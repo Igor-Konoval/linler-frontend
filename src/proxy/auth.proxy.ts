@@ -144,15 +144,12 @@ function extractTokenPair(payload: unknown): TokenPair | undefined {
 
 async function refreshTokens(refreshToken: string): Promise<RefreshResult> {
   try {
-    const response = await fetch(
-      `${serverEnv.API_URL}/auth/refresh`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${refreshToken}`,
-        },
+    const response = await fetch(`${serverEnv.API_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${refreshToken}`,
       },
-    );
+    });
 
     const payload = await response
       .json()
