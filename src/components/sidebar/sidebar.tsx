@@ -30,8 +30,8 @@ import {
   SIDEBAR_WIDTH,
   SIDEBAR_WIDTH_ICON,
   SIDEBAR_WIDTH_MOBILE,
-} from '@/src/constants/sidebar';
-import { SidebarState } from '@/src/constants/base.constants';
+  SidebarState,
+} from '@/src/constants/sidebar.constants';
 
 type SidebarContextProps = {
   state: SidebarState;

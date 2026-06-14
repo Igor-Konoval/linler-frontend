@@ -8,8 +8,3 @@ export const REFRESH_RATE_LIMITED_UNTIL_COOKIE_KEY = 'refreshRateLimitedUntil';
 export const REFRESH_RATE_LIMIT_COOLDOWN_MS = 15_000;
 
 export const MOBILE_BREAKPOINT = 768;
-
-export enum SidebarState {
-  Expanded = 'expanded',
-  Collapsed = 'collapsed',
-}
