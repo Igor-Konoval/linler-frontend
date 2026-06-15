@@ -15,12 +15,15 @@
   --scrollbar: oklch(0.922 0 0 / 20%);
 
   --sidebar-item-hover: oklch(0.922 0 0);
+  --sidebar-background: #f2f2f2;
 
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
 
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
+
+  --hover-card: #a19e99;
 
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
@@ -50,12 +53,15 @@
   --scrollbar: oklch(0.922 0 0 / 20%);
 
   --sidebar-item-hover: oklch(36.768% 0.00004 271.152);
+  --sidebar-background: #1f1f1f;
 
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
 
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
+
+  --hover-card: #7d7a75;
 
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
