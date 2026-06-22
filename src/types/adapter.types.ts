@@ -1,9 +1,7 @@
 export interface AuthAdapter {
-  getAccessToken(): Promise<string | undefined>;
-
-  getRefreshToken(): Promise<string | undefined>;
+  readonly supportsRefresh: boolean;
 
   getCookieHeader(): Promise<string | undefined>;
 
-  refreshToken(refreshToken: string): Promise<boolean>;
+  refreshToken(): Promise<boolean>;
 }

@@ -12,6 +12,9 @@
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
 
+  --bg-primary: #007dea;
+  --text-primary: #ffffff;
+
   --scrollbar: oklch(0.922 0 0 / 20%);
 
   --sidebar-item-hover: oklch(0.922 0 0);
@@ -49,6 +52,9 @@
 .dark {
   --background: oklch(0.205 0 0);
   --foreground: oklch(0.985 0 0);
+
+  --bg-primary: #0764b5;
+  --text-primary: #ffffff;
 
   --scrollbar: oklch(0.922 0 0 / 20%);
 

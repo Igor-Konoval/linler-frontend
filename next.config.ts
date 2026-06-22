@@ -14,8 +14,6 @@ const nextConfig: NextConfig = {
 
   poweredByHeader: false,
 
-  typedRoutes: true,
-
   experimental: {
     serverActions: {
       allowedOrigins: ['localhost:3000'],
