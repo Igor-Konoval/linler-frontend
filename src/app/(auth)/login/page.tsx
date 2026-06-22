@@ -1,5 +1,10 @@
 import { BackButton } from '@/src/components/ui/back-button';
 import { LoginForm } from './_components/login-form';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Log in to your account',
+};
 
 export default async function Page() {
   return (
