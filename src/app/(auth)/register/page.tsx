@@ -1,5 +1,10 @@
 import { BackButton } from '@/src/components/ui/back-button';
 import { RegisterForm } from './_components/register-form';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Create your account',
+};
 
 export default async function Page() {
   return (
