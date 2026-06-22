@@ -1,36 +1,30 @@
-import {
-  ACCESS_TOKEN_KEY,
-  REFRESH_TOKEN_KEY,
-} from '@/src/constants/base.constants';
 import { clientEnv } from '@/src/env/client';
-import { AuthAdapter } from '@/src/types/adapter.types';
-import { getCookie } from 'cookies-next';
+import type { AuthAdapter } from '@/src/types/adapter.types';
 
 export class ClientAuthAdapter implements AuthAdapter {
-  async getAccessToken(): Promise<string | undefined> {
-    const token = getCookie(ACCESS_TOKEN_KEY);
+  readonly supportsRefresh = true;
 
-    return typeof token === 'string' ? token : undefined;
-  }
-
-  async getRefreshToken(): Promise<string | undefined> {
-    const token = getCookie(REFRESH_TOKEN_KEY);
-
-    return typeof token === 'string' ? token : undefined;
-  }
+  private static refreshPromise: Promise<boolean> | null = null;
 
   async getCookieHeader(): Promise<string | undefined> {
-    return document.cookie;
+    return undefined;
   }
 
-  async refreshToken(refreshToken: string): Promise<boolean> {
+  async refreshToken(): Promise<boolean> {
+    if (!ClientAuthAdapter.refreshPromise) {
+      ClientAuthAdapter.refreshPromise = this.performRefresh().finally(() => {
+        ClientAuthAdapter.refreshPromise = null;
+      });
+    }
+
+    return ClientAuthAdapter.refreshPromise;
+  }
+
+  private async performRefresh(): Promise<boolean> {
     const response = await fetch(
       `${clientEnv.NEXT_PUBLIC_API_URL}/auth/refresh`,
       {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${refreshToken}`,
-        },
         credentials: 'include',
       },
     );

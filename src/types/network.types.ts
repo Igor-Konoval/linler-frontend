@@ -23,4 +23,5 @@ export interface ErrorPayload {
   statusCode: StatusCodes;
   code: ErrorCodes;
   errorMessage: string | string[];
+  fieldErrors?: Record<string, string | string[]>;
 }

@@ -1,10 +1,8 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import {
   AUTH_PAGES_URLS_ARRAY,
-  LOGIN_QUERY_PARAM,
   PATHNAME_HEADER,
   PROTECTED_PAGES_URLS_ARRAY,
-  ROUTES,
 } from '../constants/routes.constants';
 import {
   ACCESS_TOKEN_KEY,
@@ -13,14 +11,43 @@ import {
   REFRESH_TOKEN_KEY,
 } from '../constants/base.constants';
 
+export function getOriginFromUrl(value?: string): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  try {
+    return new URL(value).origin;
+  } catch {
+    return undefined;
+  }
+}
+
 export function applySecurityHeaders(response: NextResponse): NextResponse {
+  const apiOrigin = getOriginFromUrl(process.env.NEXT_PUBLIC_API_URL);
+
+  const connectSources = [
+    "'self'",
+    apiOrigin,
+    'https:',
+    'wss:',
+    'blob:',
+    'data:',
+  ].filter(Boolean);
+
+  const imageSources = ["'self'", 'data:', 'blob:', 'https:'];
+
+  if (apiOrigin) {
+    imageSources.push(apiOrigin);
+  }
+
   const contentSecurityPolicy = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https:",
+    `img-src ${imageSources.join(' ')}`,
     "font-src 'self' data: https:",
-    "connect-src 'self' https: wss: blob: data:",
+    `connect-src ${connectSources.join(' ')}`,
     "frame-src 'self' https:",
     "worker-src 'self' blob:",
     "frame-ancestors 'none'",
@@ -74,14 +101,6 @@ export function isAuthPath(pathname: string): boolean {
   return AUTH_PAGES_URLS_ARRAY.some((route) =>
     isSameOrNestedPath(pathname, route),
   );
-}
-
-export function getLoginUrl(request: NextRequest): URL {
-  const url = new URL(ROUTES.HOME, request.url);
-
-  url.searchParams.set(LOGIN_QUERY_PARAM, 'true');
-
-  return url;
 }
 
 export function getCookieOptions(expires?: string | Date) {

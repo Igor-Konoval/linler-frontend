@@ -9,8 +9,6 @@ export const ROUTES = {
   SETTINGS: '/settings',
 } as const;
 
-export const LOGIN_QUERY_PARAM = 'login';
-
 export const PATHNAME_HEADER = 'x-current-pathname';
 
 export const AUTH_PAGES_URLS_ARRAY = [
@@ -20,4 +18,8 @@ export const AUTH_PAGES_URLS_ARRAY = [
   ROUTES.RESET_PASSWORD,
 ];
 
-export const PROTECTED_PAGES_URLS_ARRAY = [ROUTES.PROFILE, ROUTES.SETTINGS];
+export const PROTECTED_PAGES_URLS_ARRAY = [
+  ROUTES.PROFILE,
+  ROUTES.SETTINGS,
+  ROUTES.HOME,
+];
