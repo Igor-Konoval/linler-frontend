@@ -1,17 +1,13 @@
-import { Ellipsis, Star } from 'lucide-react';
-import { SidebarTrigger } from './sidebar/sidebar';
-import { Button } from './ui/button';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from './ui/hover-card';
-import { Separator } from './ui/separator';
+import { Star } from 'lucide-react';
+import { SidebarTrigger } from '../sidebar/sidebar';
+import { Button } from '../ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from '../ui/hover-card';
+import { Separator } from '../ui/separator';
+import { HeaderDropdownBtn } from './header-dropdown-btn';
 
 export function Header() {
   return (
@@ -59,25 +55,7 @@ export function Header() {
             </HoverCardContent>
           </HoverCard>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger className="px-1" asChild>
-              <Button variant="ghost">
-                <Ellipsis />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuGroup>
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Billing</DropdownMenuItem>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuGroup>
-                <DropdownMenuItem>Team</DropdownMenuItem>
-                <DropdownMenuItem>Subscription</DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <HeaderDropdownBtn />
         </div>
       </div>
     </header>

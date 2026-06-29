@@ -22,3 +22,9 @@ export enum ErrorCodes {
   UnknownError = 'UNKNOWN_ERROR',
   Unauthorized = 'UNAUTHORIZED',
 }
+
+export enum ERROR_MESSAGES {
+  SomethingWentWrong = 'Something went wrong',
+  ImageTypeNotSupported = 'Image type not supported',
+  ImageSizeLimitExceeded = 'Image size limit exceeded',
+}
