@@ -1,7 +1,7 @@
-import '../globals.css';
-import { SidebarProvider } from '@/src/components/sidebar/sidebar';
+import { Header } from '@/src/components/header/header';
 import { AppSidebar } from '@/src/components/sidebar/app-sidebar';
-import { Header } from '@/src/components/header';
+import { SidebarProvider } from '@/src/components/sidebar/sidebar';
+import '../globals.css';
 
 export default function RootLayout({
   children,
