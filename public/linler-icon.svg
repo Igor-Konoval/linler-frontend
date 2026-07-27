@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="Linler">
+  <style>
+    .sq { fill: #111111; }
+    .wv { stroke: #f5f3ec; }
+    @media (prefers-color-scheme: dark) {
+      .sq { fill: #f5f3ec; }
+      .wv { stroke: #333029; }
+    }
+  </style>
+  <rect class="sq" x="6" y="6" width="88" height="88" rx="24" ry="24" />
+  <polyline
+    class="wv"
+    fill="none"
+    stroke-width="1.7"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    points="14.00,41.72 16.40,66.04 18.80,29.16 21.20,74.86 23.60,21.62 26.00,81.50 28.40,15.72 30.80,86.75 33.20,11.08 35.60,90.80 38.00,7.61 40.40,93.69 42.80,5.30 45.20,95.42 47.60,4.14 50.00,96.00 52.40,4.14 54.80,95.42 57.20,5.30 59.60,93.69 62.00,7.61 64.40,90.80 66.80,11.08 69.20,86.75 71.60,15.72 74.00,81.50 76.40,21.62 78.80,74.86 81.20,29.16 83.60,66.04 86.00,41.72"
+  />
+</svg>

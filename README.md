@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Linler Frontend
 
-## Getting Started
+Linler is a Notion-like productivity app with workspaces, projects, pages, user accounts, and collaborative content management.
+Built with Next.js, TypeScript, Tailwind, React Query, and a NestJS backend.
 
-First, run the development server:
+## Start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+App runs on `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Main
 
-## Learn More
+- `pnpm dev` - start development server.
+- `pnpm build` - production build.
+- `pnpm start` - run production server.
 
-To learn more about Next.js, take a look at the following resources:
+### Code Quality
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `pnpm fmt` - formats files with Prettier.
+- `pnpm fmt:verify` - checks formatting without changing files.
+- `pnpm lint` - ESLint with `--max-warnings 0` (warnings fail the command).
+- `pnpm lint:fix` - auto-fixes ESLint issues where possible.
+- `pnpm types` - TypeScript type checking (`tsc --noEmit`).
+- `pnpm guard` - strict checks only: `lint + types`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Combined checks
 
-## Deploy on Vercel
+- `pnpm check` - local developer flow: format first, then strict checks.
+  - Runs: `fmt -> guard`
+  - Use before commit when you want files auto-formatted.
+- `pnpm check:ci` - CI-friendly flow without file modifications.
+  - Runs: `fmt:verify -> lint -> types`
+  - Use in pipelines and pre-push checks.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Git hook
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Husky pre-commit hook runs:
+
+```bash
+pnpm run check
+```
+
+This keeps committed code formatted and validated.
+
+## Recommended daily flow
+
+1. `pnpm dev`
+2. `pnpm check` before commit
+3. `pnpm check:ci` before push (optional locally, required in CI)

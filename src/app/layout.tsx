@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Providers } from '../components/providers/providers';
 import './globals.css';
 
@@ -9,6 +9,18 @@ export const metadata: Metadata = {
   },
   description:
     'Linler is a modern task planner and progress tracker with a variety of convenient views.',
+  icons: {
+    icon: [{ url: '/linler-icon.svg', type: 'image/svg+xml' }],
+  },
+};
+
+export const viewport: Viewport = {
+  colorScheme: 'light dark',
+  initialScale: 1,
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: 'white' },
+    { media: '(prefers-color-scheme: dark)', color: 'black' },
+  ],
 };
 
 export default function RootLayout({

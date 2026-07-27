@@ -20,6 +20,8 @@
   --sidebar-item-hover: oklch(0.922 0 0);
   --sidebar-background: #f2f2f2;
 
+  --skeleton-background: #cbcbcb;
+
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
 
@@ -60,6 +62,8 @@
 
   --sidebar-item-hover: oklch(36.768% 0.00004 271.152);
   --sidebar-background: #1f1f1f;
+
+  --skeleton-background: #4a4a4a;
 
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
@@ -156,4 +160,41 @@
 
 a {
   text-decoration-line: none;
+}
+
+/* Linler loading animations */
+@keyframes linler-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 0.82;
+  }
+}
+.linler-breathe {
+  animation: linler-breathe 2s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes linler-bar {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+.linler-bar {
+  animation: linler-bar 1.4s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .linler-breathe,
+  .linler-bar {
+    animation: none;
+  }
 }
