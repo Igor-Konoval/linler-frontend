@@ -27,4 +27,5 @@ export enum ERROR_MESSAGES {
   SomethingWentWrong = 'Something went wrong',
   ImageTypeNotSupported = 'Image type not supported',
   ImageSizeLimitExceeded = 'Image size limit exceeded',
+  UnexpectedRequestError = 'Unexpected request error',
 }

@@ -5,15 +5,17 @@
   "author": "Igor Konoval",
   "scripts": {
     "build": "next build",
-    "check": "pnpm run validate-eslint && pnpm run verify-prettier && pnpm run typecheck",
+    "check": "pnpm run fmt && pnpm run guard",
+    "check:ci": "pnpm run fmt:verify && pnpm run lint && pnpm run types",
     "dev": "next dev",
-    "format": "prettier --write --ignore-path .prettierignore --ignore-path .gitignore .",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
+    "fmt": "prettier --write --ignore-path .prettierignore --ignore-path .gitignore .",
+    "fmt:verify": "prettier --check --ignore-path .prettierignore --ignore-path .gitignore .",
+    "guard": "pnpm run lint && pnpm run types",
+    "lint": "eslint --max-warnings 0 --ext .js,.jsx,.ts,.tsx .",
+    "lint:fix": "pnpm run lint -- --fix",
     "prepare": "pnpm exec husky install",
     "start": "next start",
-    "typecheck": "tsc --noEmit",
-    "validate-eslint": "eslint --ext .js,.jsx,.ts,.tsx .",
-    "verify-prettier": "prettier --check --ignore-path .prettierignore --ignore-path .gitignore ."
+    "types": "tsc --noEmit"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -57,5 +59,9 @@
     "prettier-plugin-tailwindcss": "^0.5.0",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "packageManager": "pnpm@10.30.0",
+  "engines": {
+    "node": "24.x"
   }
 }

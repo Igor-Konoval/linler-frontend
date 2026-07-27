@@ -2,120 +2,76 @@ import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarRail,
 } from '@/src/components/sidebar/sidebar';
-import { VersionSwitcher } from './space-switcher';
-import Link from 'next/link';
-import type { UrlObject } from 'url';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '../ui/accordion';
-import { Clock, EyeOff, Users } from 'lucide-react';
-import { Separator } from '../ui/separator';
+import { PATHNAME_HEADER, ROUTES } from '@/src/constants/routes.constants';
+import { Bell, Lightbulb } from 'lucide-react';
+import { headers } from 'next/headers';
+import { Suspense } from 'react';
+import { SIDEBAR_NAV_DEFAULT_OPEN } from '../../constants/sidebar-nav.constants';
+import { Accordion } from '../ui/accordion';
+import { InvitationSkeleton } from './actions/invitation-skeleton';
+import { InvitationsSection } from './actions/invitations-section';
+import { AddWorkspaceButton } from './add-workspace-button';
+import { MembersSection } from './members/members-section';
+import { MembersSkeleton } from './members/members-skeleton';
+import { ProjectsSection } from './projects/projects-section';
+import { ProjectsSkeleton } from './projects/projects-skeleton';
+import { SpaceSwitcherSection } from './space-switcher/space-switcher-section';
+import { AppSidebarSkeleton } from './space-switcher/space-switcher-skeleton';
+import { Button } from '../ui/button';
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const data = {
-    versions: ['1.0.1', '1.1.0-alpha', '2.0.0-beta1'],
-    navMain: [
-      {
-        title: 'Recent',
-        icon: <Clock className="mr-1.5" />,
-        items: [
-          {
-            title: 'Project 1',
-            url: '#',
-            isActive: true,
-          },
-          {
-            title: 'Project 2',
-            url: '#',
-            isActive: false,
-          },
-        ],
-      },
-      {
-        title: 'Users',
-        icon: <Users className="mr-1.5" />,
-        items: [
-          {
-            title: 'Igor Konoval (you)',
-            isActive: false,
-          },
-          {
-            title: 'Jane Doe',
-            isActive: false,
-          },
-        ],
-      },
-      {
-        title: 'Private',
-        icon: <EyeOff className="mr-1.5" />,
-        items: [
-          {
-            title: 'Project 1',
-            isActive: false,
-            url: '#',
-          },
-        ],
-      },
-    ],
-  };
+async function getCurrentWorkspaceId(): Promise<string | undefined> {
+  const headersList = await headers();
+  const pathname = headersList.get(PATHNAME_HEADER);
+  const workspacePath = `${ROUTES.WORKSPACE}/`;
+
+  if (!pathname?.startsWith(workspacePath)) {
+    return undefined;
+  }
+
+  return pathname.slice(workspacePath.length).split('/')[0] || undefined;
+}
+
+export async function AppSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
+  const currentWorkspaceId = await getCurrentWorkspaceId();
+
   return (
     <Sidebar {...props}>
-      <SidebarHeader>
-        <VersionSwitcher
-          versions={data.versions}
-          defaultVersion={data.versions[0]}
-        />
+      <SidebarHeader className="gap-0.5">
+        <Suspense fallback={<AppSidebarSkeleton />}>
+          <SpaceSwitcherSection />
+        </Suspense>
+        <AddWorkspaceButton />
+        <SidebarGroup className="p-0">
+          <SidebarGroupLabel>
+            <Lightbulb className="mr-1.5" /> Actions
+          </SidebarGroupLabel>
+          <Suspense fallback={<InvitationSkeleton />}>
+            <InvitationsSection workspaceId={currentWorkspaceId} />
+          </Suspense>
+          <div className="flex items-center gap-2 pr-2">
+            <Button
+              variant="ghost"
+              className="hover:bg-(--sidebar-item-hover)! ml-2 w-full justify-start"
+            >
+              <Bell /> Notifications
+            </Button>
+          </div>
+        </SidebarGroup>
       </SidebarHeader>
       <SidebarContent>
-        <Accordion
-          type="multiple"
-          defaultValue={data.navMain.map((item) => item.title)}
-        >
-          {data.navMain.map((item) => (
-            <SidebarGroup className="py-0" key={item.title}>
-              <AccordionItem value={item.title}>
-                <AccordionTrigger className="py-0">
-                  <SidebarGroupLabel>
-                    {item.icon} {item.title}
-                  </SidebarGroupLabel>
-                </AccordionTrigger>
-                <AccordionContent className="ml-3 h-auto pb-0">
-                  <SidebarGroupContent>
-                    <SidebarMenu>
-                      {item.items.map((item) => (
-                        <SidebarMenuItem
-                          className="hover:bg-(--sidebar-item-hover) rounded-md transition-colors hover:cursor-pointer"
-                          key={item.title}
-                        >
-                          <SidebarMenuButton asChild isActive={item?.isActive}>
-                            {'url' in item ? (
-                              <Link href={item.url as unknown as UrlObject}>
-                                {item.title}
-                              </Link>
-                            ) : (
-                              <span>{item.title}</span>
-                            )}
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
-                    </SidebarMenu>
-                  </SidebarGroupContent>
-                </AccordionContent>
-                <Separator className="my-2" />
-              </AccordionItem>
-            </SidebarGroup>
-          ))}
+        <Accordion type="multiple" defaultValue={SIDEBAR_NAV_DEFAULT_OPEN}>
+          <Suspense fallback={<ProjectsSkeleton />}>
+            <ProjectsSection workspaceId={currentWorkspaceId} />
+          </Suspense>
+          <Suspense fallback={<MembersSkeleton />}>
+            <MembersSection workspaceId={currentWorkspaceId} />
+          </Suspense>
         </Accordion>
       </SidebarContent>
       <SidebarRail />

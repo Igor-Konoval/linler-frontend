@@ -225,9 +225,7 @@ export function EditAccountSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         className={isMobile ? 'max-w-screen! w-screen!' : ''}
-        onOpenAutoFocus={(e) => {
-          e.preventDefault();
-        }}
+        onOpenAutoFocus={(event) => event.preventDefault()}
       >
         <SheetHeader>
           <SheetTitle>Account</SheetTitle>
