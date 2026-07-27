@@ -40,14 +40,14 @@ App runs on `http://localhost:3000`.
 
 ## Git hooks
 
-Husky hooks configured in this repo:
+Automatic git hooks are intentionally disabled.
+
+Run checks manually when needed:
 
 ```bash
-pre-commit -> pnpm run check
-pre-push   -> pnpm run check:ci
+pnpm run check
+pnpm run check:ci
 ```
-
-This means commit auto-formats + validates, and push runs strict non-mutating checks.
 
 ## Recommended daily flow
 
