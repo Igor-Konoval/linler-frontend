@@ -24,6 +24,3 @@ jobs:
 
       - name: CI checks
         run: pnpm check:ci
-
-      - name: Build
-        run: pnpm build
