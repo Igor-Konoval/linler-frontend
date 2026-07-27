@@ -38,15 +38,16 @@ App runs on `http://localhost:3000`.
   - Runs: `fmt:verify -> lint -> types`
   - Use in pipelines and pre-push checks.
 
-## Git hook
+## Git hooks
 
-Husky pre-commit hook runs:
+Husky hooks configured in this repo:
 
 ```bash
-pnpm run check
+pre-commit -> pnpm run check
+pre-push   -> pnpm run check:ci
 ```
 
-This keeps committed code formatted and validated.
+This means commit auto-formats + validates, and push runs strict non-mutating checks.
 
 ## Recommended daily flow
 
