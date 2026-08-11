@@ -22,3 +22,8 @@ export enum ProjectMemberRole {
   EDITOR = 'EDITOR',
   VIEWER = 'VIEWER',
 }
+
+export enum SelectedWorkspaceState {
+  SELECTED = 'SELECTED',
+  NOT_SELECTED = 'NOT_SELECTED',
+}

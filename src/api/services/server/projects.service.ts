@@ -3,6 +3,7 @@ import type {
   EditProjectRequest,
   GetProjectsResponse,
   ProjectResponse,
+  SetDefaultPageRequest,
 } from '@/src/types/projects.types';
 import { serverHttp } from '../../http/server-http';
 
@@ -13,6 +14,14 @@ export const ProjectsService = {
   getProjects(workspaceId: string) {
     return serverHttp.request<GetProjectsResponse, void>({
       endpoint: `${this.workspaceApiUrl}/${workspaceId}/projects`,
+      method: 'GET',
+      retryOnUnauthorized: false,
+    });
+  },
+
+  getProject(projectId: string) {
+    return serverHttp.request<ProjectResponse, void>({
+      endpoint: `${this.apiUrl}/${projectId}`,
       method: 'GET',
       retryOnUnauthorized: false,
     });
@@ -31,6 +40,15 @@ export const ProjectsService = {
     return serverHttp.request<ProjectResponse, CreateProjectRequest>({
       endpoint: `${this.workspaceApiUrl}/${workspaceId}/projects`,
       method: 'POST',
+      body: request,
+      retryOnUnauthorized: true,
+    });
+  },
+
+  setDefaultPage(projectId: string, request: SetDefaultPageRequest) {
+    return serverHttp.request<ProjectResponse, SetDefaultPageRequest>({
+      endpoint: `${this.apiUrl}/${projectId}/default-page`,
+      method: 'PATCH',
       body: request,
       retryOnUnauthorized: true,
     });

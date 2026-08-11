@@ -47,10 +47,12 @@ const formSchema = z.object({
 
 export function CreateProjectModal({
   trigger,
+  triggerClassName,
   workspaceId,
   visibility,
 }: {
   trigger: React.ReactNode;
+  triggerClassName?: string;
   workspaceId: string;
   visibility: ProjectVisibility;
 }) {
@@ -98,16 +100,23 @@ export function CreateProjectModal({
     }
   }, [open, form]);
 
+  const handleCreateProjectSubmit = form.handleSubmit(onSubmit);
+
   return (
     <Modal
       title="Create project"
       description="You can create a new project."
       trigger={trigger}
+      triggerClassName={triggerClassName}
       contentClassName="max-w-[700px]!"
       footerButtons={
         <>
           <DialogClose asChild>
-            <Button variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => setOpen(false)}
+            >
               Cancel
             </Button>
           </DialogClose>
@@ -127,7 +136,15 @@ export function CreateProjectModal({
       <Form {...form}>
         <form
           id="create-project-form"
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(event) => {
+            if (event.target !== event.currentTarget) {
+              event.preventDefault();
+              event.stopPropagation();
+              return;
+            }
+
+            void handleCreateProjectSubmit(event);
+          }}
           className="space-y-4"
         >
           <FormField

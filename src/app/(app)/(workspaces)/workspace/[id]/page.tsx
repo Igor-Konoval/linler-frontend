@@ -1,7 +1,6 @@
 import { WorkspaceService } from '@/src/api/services/server/workspace.service';
-import { GetWorkspaceResponse } from '@/src/types/workspaces.types';
 import { notFound } from 'next/navigation';
-import { ClientPage } from './_components/client-page';
+import { PageContent } from '../_components/page-content';
 
 export default async function Page({
   params,
@@ -9,9 +8,8 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  let workspace: GetWorkspaceResponse | undefined = undefined;
   try {
-    workspace = await WorkspaceService.getCurrentWorkspace(id);
+    await WorkspaceService.getCurrentWorkspace(id);
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
       console.error(error);
@@ -19,10 +17,5 @@ export default async function Page({
     notFound();
   }
 
-  return (
-    <div>
-      Workspace {workspace.name}
-      <ClientPage id={id} initialData={workspace} />
-    </div>
-  );
+  return <PageContent />;
 }
