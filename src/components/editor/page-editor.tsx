@@ -200,6 +200,7 @@ function PageEditorContent({ page }: { page: PageResponse }) {
     editorContentWidthRef,
     pageId,
     sanitizeContentForSave,
+    projectId: page.projectId,
   });
 
   const { editor, uploadAndInsertAttachments, isUploadingAttachment } =

@@ -20,6 +20,7 @@ interface UseSaveInterface {
   coverMetaRef: RefObject<PageCoverMeta>;
   editorContentWidthRef: RefObject<number | null>;
   editorContentOffsetXRef: RefObject<number | null>;
+  projectId: string;
 }
 
 export function useSave({
@@ -28,6 +29,7 @@ export function useSave({
   coverMetaRef,
   editorContentWidthRef,
   editorContentOffsetXRef,
+  projectId,
 }: UseSaveInterface) {
   const pendingUpdate = useRef<UpdatePageRequest>({});
   const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
@@ -36,7 +38,7 @@ export function useSave({
   const [saveState, setSaveState] = useState<SaveStateEnum>(
     SaveStateEnum.SAVED,
   );
-  const { mutateAsync, isPending } = useUpdatePage();
+  const { mutateAsync, isPending } = useUpdatePage(projectId);
 
   const save = useCallback(async () => {
     const request = pendingUpdate.current;
