@@ -18,9 +18,7 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-
       - name: Install deps
         run: pnpm install --frozen-lockfile
-
       - name: CI checks
         run: pnpm check:ci

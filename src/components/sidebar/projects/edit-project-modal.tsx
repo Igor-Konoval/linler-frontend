@@ -3,7 +3,7 @@
 import { Modal } from '@/src/components/ui/modal';
 import { applyRequestFailureToForm } from '@/src/utils/form-error.utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -35,6 +35,8 @@ import {
 import { Switch } from '../../ui/toggle';
 import { SettingsProjectMembersSection } from './settings-project-members-section';
 import { useGetWorkspaceRole } from '@/src/hooks/use-get-workspace-role';
+import { CreateProjectPageModal } from '../project-pages/create-project-page-modal';
+import { FileText } from 'lucide-react';
 
 const formSchema = z.object({
   name: z
@@ -67,6 +69,8 @@ export function SettingsProjectModal({
   project: ProjectResponse;
 }) {
   const [open, setOpen] = useState(false);
+  const [openPageModal, setOpenPageModal] = useState(false);
+  const formId = useId();
   const { mutateAsync: editProject, isPending } = useEditProject();
   const { mutateAsync: deleteProject, isPending: isDeleting } =
     useDeleteProject();
@@ -82,6 +86,13 @@ export function SettingsProjectModal({
       archived: project.isArchived,
     },
   });
+
+  const handleSettingsOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      setOpenPageModal(false);
+    }
+  };
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     try {
@@ -105,7 +116,7 @@ export function SettingsProjectModal({
         orderIndex: response.orderIndex,
         archived: response.isArchived,
       });
-      setOpen(false);
+      handleSettingsOpenChange(false);
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.error(error);
@@ -121,7 +132,7 @@ export function SettingsProjectModal({
     try {
       await deleteProject(project.id);
       toast.success('Project deleted successfully');
-      setOpen(false);
+      handleSettingsOpenChange(false);
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.error(error);
@@ -136,6 +147,8 @@ export function SettingsProjectModal({
     }
   }, [open, form]);
 
+  const handleSettingsSubmit = form.handleSubmit(onSubmit);
+
   return (
     <Modal
       title="Project settings"
@@ -147,7 +160,11 @@ export function SettingsProjectModal({
       footerButtons={
         <>
           <DialogClose asChild>
-            <Button variant="outline" onClick={() => setOpen(false)}>
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => handleSettingsOpenChange(false)}
+            >
               Cancel
             </Button>
           </DialogClose>
@@ -155,19 +172,27 @@ export function SettingsProjectModal({
             isLoading={isPending}
             disabled={!form.formState.isDirty}
             type="submit"
-            form="edit-project-form"
+            form={formId}
           >
             Update
           </Button>
         </>
       }
       open={open}
-      setOpen={setOpen}
+      setOpen={handleSettingsOpenChange}
     >
       <Form {...form}>
         <form
-          id="edit-project-form"
-          onSubmit={form.handleSubmit(onSubmit)}
+          id={formId}
+          onSubmit={(event) => {
+            if (event.target !== event.currentTarget) {
+              event.preventDefault();
+              event.stopPropagation();
+              return;
+            }
+
+            void handleSettingsSubmit(event);
+          }}
           className="space-y-4"
         >
           <FormField
@@ -306,6 +331,18 @@ export function SettingsProjectModal({
             isAdmin={isAdmin}
           />
 
+          <Button
+            variant="outline"
+            className="w-full"
+            type="button"
+            disabled={isPending || !isAdmin || project.defaultPageId !== null}
+            onClick={() => {
+              setOpenPageModal(true);
+            }}
+          >
+            Add default page <FileText />
+          </Button>
+
           {isAdmin && (
             <div className="flex items-center justify-between gap-2 rounded-xl border border-[#af5d5d] bg-[#fff7f7] p-2 dark:border-[#fb5c5c] dark:bg-[#5f00001c]">
               <span className="pl-0.5 text-sm text-[#916767] dark:text-[#b5b5b5]">
@@ -319,11 +356,12 @@ export function SettingsProjectModal({
                   <Button
                     variant="destructive"
                     isLoading={isPending || isDeleting}
+                    type="button"
                   >
                     {isDeleting ? 'Deleting...' : 'Delete'}
                   </Button>
                 }
-              ></ConfirmationDialog>
+              />
             </div>
           )}
 
@@ -334,6 +372,17 @@ export function SettingsProjectModal({
           ) : null}
         </form>
       </Form>
+
+      {project.id ? (
+        <CreateProjectPageModal
+          isOpen={openPageModal}
+          setIsOpen={setOpenPageModal}
+          projectId={project.id}
+          projectRole={project.role}
+          isDefaultPage={true}
+          parentPageId={null}
+        />
+      ) : null}
     </Modal>
   );
 }

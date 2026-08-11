@@ -162,6 +162,294 @@ a {
   text-decoration-line: none;
 }
 
+.linler-editor .tiptap {
+  min-height: 420px;
+  outline: none;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.linler-editor .tiptap > :first-child {
+  margin-top: 0;
+}
+
+.linler-editor .tiptap p,
+.linler-editor .tiptap ul,
+.linler-editor .tiptap ol,
+.linler-editor .tiptap pre,
+.linler-editor .tiptap blockquote,
+.linler-editor .tiptap .linler-callout {
+  margin: 0.65rem 0;
+}
+
+.linler-editor .tiptap h1,
+.linler-editor .tiptap h2,
+.linler-editor .tiptap h3 {
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.linler-editor .tiptap h1 {
+  font-size: 1.875rem;
+  margin: 1.75rem 0 0.75rem;
+}
+.linler-editor .tiptap h2 {
+  font-size: 1.5rem;
+  margin: 1.5rem 0 0.65rem;
+}
+.linler-editor .tiptap h3 {
+  font-size: 1.25rem;
+  margin: 1.25rem 0 0.5rem;
+}
+.linler-editor .tiptap ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+}
+.linler-editor .tiptap ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+}
+.linler-editor .tiptap li p {
+  margin: 0.15rem 0;
+}
+.linler-editor .tiptap ul[data-type='taskList'] {
+  list-style: none;
+  padding-left: 0;
+}
+.linler-editor .tiptap ul[data-type='taskList'] li {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+.linler-editor .tiptap ul[data-type='taskList'] input {
+  accent-color: var(--bg-primary);
+}
+.linler-editor .tiptap blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 1rem;
+  color: var(--muted-foreground);
+}
+.linler-editor .tiptap pre {
+  overflow-x: auto;
+  border-radius: 0.75rem;
+  background: #1e1e1e;
+  color: #f8f8f2;
+  padding: 1rem;
+  font-size: 0.9rem;
+}
+.linler-editor .tiptap code {
+  border-radius: 0.25rem;
+  background: var(--secondary);
+  padding: 0.1rem 0.25rem;
+  font-size: 0.9em;
+}
+.linler-editor .tiptap pre code {
+  background: transparent;
+  padding: 0;
+}
+.linler-editor .tiptap hr {
+  margin: 1.5rem 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+.linler-editor .tiptap a:not(.linler-file):not(.linler-link-chip) {
+  color: color-mix(in oklch, var(--bg-primary) 78%, #0f766e);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  border-radius: 0.25rem;
+  padding: 0 0.1rem;
+}
+
+.linler-editor .tiptap a:not(.linler-file):not(.linler-link-chip):hover {
+  background: color-mix(in oklch, var(--bg-primary) 9%, transparent);
+}
+
+.linler-editor .tiptap .linler-link-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  background: var(--secondary);
+  padding: 0.05rem 0.5rem 0.05rem 0.35rem;
+  margin: 0 0.05rem;
+  color: inherit;
+  text-decoration: none;
+  font-size: 0.95em;
+  line-height: 1.4;
+  vertical-align: baseline;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.linler-editor .tiptap .linler-link-chip:hover {
+  background: color-mix(in oklch, var(--bg-primary) 12%, var(--secondary));
+}
+
+.linler-editor .tiptap .linler-link-chip-icon {
+  display: inline-flex;
+  width: 1em;
+  height: 1em;
+  flex: none;
+}
+
+.linler-editor .tiptap .linler-link-chip-icon::before {
+  content: '🔗';
+  font-size: 0.95em;
+  line-height: 1;
+}
+
+.linler-editor .tiptap .linler-link-chip[data-link-type='project'] {
+  border-color: color-mix(in oklch, #8b5cf6 45%, var(--border));
+  background: color-mix(in oklch, #8b5cf6 10%, var(--secondary));
+}
+.linler-editor
+  .tiptap
+  .linler-link-chip[data-link-type='project']
+  .linler-link-chip-icon::before {
+  content: '🗂️';
+}
+
+.linler-editor .tiptap .linler-link-chip[data-link-type='page'] {
+  border-color: color-mix(in oklch, #2563eb 40%, var(--border));
+  background: color-mix(in oklch, #2563eb 9%, var(--secondary));
+}
+.linler-editor
+  .tiptap
+  .linler-link-chip[data-link-type='page']
+  .linler-link-chip-icon::before {
+  content: '📄';
+}
+
+.linler-editor .tiptap .linler-link-chip[data-link-type='external'] {
+  border-color: color-mix(in oklch, #0f766e 35%, var(--border));
+  background: color-mix(in oklch, #0f766e 8%, var(--secondary));
+}
+
+.linler-editor .tiptap .linler-link-chip-label {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.linler-editor .tiptap img {
+  max-width: 100%;
+  border-radius: 0.75rem;
+}
+.linler-editor .tiptap .tableWrapper {
+  display: block;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  margin: 1rem 0;
+  contain: inline-size;
+}
+.linler-editor .tiptap table {
+  width: max-content;
+  min-width: 0;
+  max-width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+.linler-editor .tiptap th,
+.linler-editor .tiptap td {
+  position: relative;
+  min-width: 120px;
+  max-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.65rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.linler-editor .tiptap th p,
+.linler-editor .tiptap td p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
+}
+
+.linler-editor .tiptap .column-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  bottom: -1px;
+  width: 4px;
+  background-color: var(--bg-primary);
+  pointer-events: none;
+}
+
+.linler-editor .tiptap.resize-cursor {
+  cursor: col-resize;
+}
+
+@media (max-width: 640px) {
+  .linler-editor .tiptap {
+    font-size: 1rem;
+  }
+
+  .linler-editor .tiptap .tableWrapper {
+    padding-bottom: 0.25rem;
+  }
+
+  .linler-editor .tiptap th,
+  .linler-editor .tiptap td {
+    min-width: 96px;
+  }
+}
+.linler-editor .tiptap th {
+  background: var(--secondary);
+  font-weight: 600;
+}
+.linler-editor .tiptap .selectedCell::after {
+  background: color-mix(in oklch, var(--bg-primary) 14%, transparent);
+}
+.linler-editor .tiptap .linler-callout {
+  border-radius: 0.75rem;
+  background: color-mix(in oklch, #d3e5ef 65%, transparent);
+  padding: 0.85rem 1rem;
+}
+.linler-editor .tiptap .linler-callout::before {
+  content: '💡';
+  margin-right: 0.6rem;
+}
+.linler-editor .tiptap .linler-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--border);
+  border-radius: 0.625rem;
+  background: var(--secondary);
+  padding: 0.75rem 2.25rem 0.75rem 1rem;
+  color: inherit;
+  font-size: 0.9rem;
+}
+.linler-editor .tiptap .linler-file::before {
+  content: '📎';
+}
+.linler-editor .tiptap p.is-editor-empty:first-child::before {
+  color: var(--muted-foreground);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
 /* Linler loading animations */
 @keyframes linler-breathe {
   0%,

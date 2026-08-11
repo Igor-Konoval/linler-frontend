@@ -53,32 +53,32 @@ export function Modal({
           {trigger}
         </DialogTrigger>
       ) : null}
-      <form>
-        <DialogContent
-          className={cn('sm:max-w-sm', contentClassName)}
-          onOpenAutoFocus={onOpenAutoFocus}
-        >
-          <DialogHeader className={cn(headerClassName)}>
-            <DialogTitle className={cn(titleClassName)}>{title}</DialogTitle>
-            <DialogDescription className={cn(descriptionClassName)}>
-              {description}
-            </DialogDescription>
-          </DialogHeader>
-          {children}
-          <DialogFooter className={cn(footerClassName)}>
-            {footerButtons ?? (
-              <>
-                <DialogClose asChild onClick={onCancel}>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
-                <Button type="submit" onClick={onConfirm}>
-                  Confirm
+      <DialogContent
+        className={cn('sm:max-w-sm', contentClassName)}
+        onOpenAutoFocus={onOpenAutoFocus}
+      >
+        <DialogHeader className={cn(headerClassName)}>
+          <DialogTitle className={cn(titleClassName)}>{title}</DialogTitle>
+          <DialogDescription className={cn(descriptionClassName)}>
+            {description}
+          </DialogDescription>
+        </DialogHeader>
+        {children}
+        <DialogFooter className={cn(footerClassName)}>
+          {footerButtons ?? (
+            <>
+              <DialogClose asChild onClick={onCancel}>
+                <Button variant="outline" type="button">
+                  Cancel
                 </Button>
-              </>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </form>
+              </DialogClose>
+              <Button type="button" onClick={onConfirm}>
+                Confirm
+              </Button>
+            </>
+          )}
+        </DialogFooter>
+      </DialogContent>
     </Dialog>
   );
 }

@@ -2,11 +2,15 @@ import { ErrorCodes, StatusCodes } from '@/src/constants/http.constants';
 
 import { AuthAdapter } from '@/src/types/adapter.types';
 
-import { ApiResponse, RequestSettings } from '@/src/types/network.types';
+import {
+  ApiResponse,
+  RequestSettings,
+  ResponseType,
+} from '@/src/types/network.types';
 
+import { clientEnv } from '@/src/env/client';
 import { RequestFailure } from '@/src/utils/request-failure.utils';
 import { RequestErrorHandler } from './http-error-handler';
-import { clientEnv } from '@/src/env/client';
 
 export class BaseHttpClient {
   constructor(
@@ -32,7 +36,10 @@ export class BaseHttpClient {
       }
     }
 
-    const result = await this.parseResponse<TResult>(response);
+    const result = await this.parseResponse<TResult>(
+      response,
+      settings.responseType,
+    );
 
     if (!result.success) {
       if (result.error) {
@@ -63,7 +70,10 @@ export class BaseHttpClient {
       retryOnUnauthorized: false,
     });
 
-    const retryResult = await this.parseResponse<TResult>(retryResponse);
+    const retryResult = await this.parseResponse<TResult>(
+      retryResponse,
+      settings.responseType,
+    );
 
     if (!retryResult.success) {
       if (retryResult.error) {
@@ -129,6 +139,7 @@ export class BaseHttpClient {
 
   protected async parseResponse<TResult>(
     response: Response,
+    responseType: ResponseType = 'auto',
   ): Promise<ApiResponse<TResult>> {
     if (response.status === StatusCodes.NoContent) {
       return {
@@ -138,7 +149,7 @@ export class BaseHttpClient {
       };
     }
 
-    const payload = await this.getResponsePayload(response);
+    const payload = await this.getResponsePayload(response, responseType);
 
     if (response.ok) {
       return {
@@ -155,7 +166,22 @@ export class BaseHttpClient {
     };
   }
 
-  protected async getResponsePayload(response: Response): Promise<unknown> {
+  protected async getResponsePayload(
+    response: Response,
+    responseType: ResponseType = 'auto',
+  ): Promise<unknown> {
+    if (responseType === 'blob') {
+      return response.blob();
+    }
+
+    if (responseType === 'text') {
+      return response.text().catch(() => '');
+    }
+
+    if (responseType === 'json') {
+      return response.json().catch(() => ({}));
+    }
+
     const contentType = response.headers.get('content-type');
     const isJson = contentType?.includes('application/json');
 

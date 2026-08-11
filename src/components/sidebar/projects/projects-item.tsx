@@ -6,11 +6,11 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/src/components/sidebar/sidebar';
 import {
+  Accordion,
   AccordionContent,
   AccordionHeader,
   AccordionItem,
@@ -18,7 +18,6 @@ import {
 } from '@/src/components/ui/accordion';
 import { Separator } from '@/src/components/ui/separator';
 import { Skeleton } from '@/src/components/ui/skeleton';
-import { ROUTES } from '@/src/constants/routes.constants';
 import { ProjectResponse } from '@/src/types/projects.types';
 import { usePathname } from 'next/navigation';
 import { useCallback } from 'react';
@@ -27,6 +26,8 @@ import { Button } from '../../ui/button';
 import { SettingsProjectModal } from './edit-project-modal';
 import { ProjectVisibility } from '@/src/constants/projects.constants';
 import { CreateProjectModal } from './create-project/create-project-modal';
+import { PagesSection } from '../project-pages/pages-section';
+import { getProjectPath } from '@/src/utils/project.utils';
 
 export type NavAccordionItem = {
   key: string;
@@ -34,10 +35,6 @@ export type NavAccordionItem = {
   url?: string;
   isActive?: boolean;
 };
-
-function getProjectPath(project: ProjectResponse): string {
-  return `${ROUTES.WORKSPACE}/${project.workspaceId}/${project.id}`;
-}
 
 export function ProjectsItem({
   value,
@@ -75,20 +72,22 @@ export function ProjectsItem({
               {icon} {title}
             </SidebarGroupLabel>
           </AccordionTrigger>
-          <CreateProjectModal
-            trigger={
-              <Button
-                variant="ghostSecondary"
-                className="hover:bg-muted! hover:text-foreground! aria-expanded:bg-muted! aria-expanded:text-foreground! absolute right-5 top-1/2 z-10 -translate-y-1/2 p-1.5"
-                onClick={(e) => e.stopPropagation()}
-                type="button"
-              >
-                <Plus strokeWidth={1} className="h-4 w-4" />
-              </Button>
-            }
-            workspaceId={workspaceId}
-            visibility={visibility}
-          />
+          {workspaceId && (
+            <CreateProjectModal
+              trigger={
+                <Button
+                  variant="ghostSecondary"
+                  className="hover:bg-muted! hover:text-foreground! aria-expanded:bg-muted! aria-expanded:text-foreground! absolute right-5 top-1/2 z-10 -translate-y-1/2 p-1.5"
+                  onClick={(e) => e.stopPropagation()}
+                  type="button"
+                >
+                  <Plus strokeWidth={1} className="h-4 w-4" />
+                </Button>
+              }
+              workspaceId={workspaceId}
+              visibility={visibility}
+            />
+          )}
         </AccordionHeader>
         <AccordionContent className="ml-3 h-auto pb-0">
           <SidebarGroupContent>
@@ -101,35 +100,47 @@ export function ProjectsItem({
                 ))
               ) : items && items.length > 0 ? (
                 items.map((item) => (
-                  <SidebarMenuItem key={item.id}>
-                    <SidebarMenuButton asChild isActive={isProjectActive(item)}>
-                      <Link
-                        href={getProjectPath(item)}
-                        className="flex w-full items-center"
-                      >
-                        {`${item.icon} ${item.name}`}
-                      </Link>
-                    </SidebarMenuButton>
-                    <SettingsProjectModal
-                      trigger={
-                        <SidebarMenuAction
-                          showOnHover
-                          asChild
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Button
-                            variant="ghostSecondary"
-                            size="icon"
-                            type="button"
-                            className="h-auto w-auto p-2"
+                  <Accordion key={item.id} type="single" collapsible>
+                    <AccordionItem value={item.id} className="border-none">
+                      <SidebarMenuItem>
+                        <AccordionHeader className="flex items-center gap-0">
+                          <SidebarMenuButton
+                            asChild
+                            isActive={isProjectActive(item)}
+                            className="flex-1"
                           >
-                            <Settings className="h-3! w-3!" />
-                          </Button>
-                        </SidebarMenuAction>
-                      }
-                      project={item}
-                    />
-                  </SidebarMenuItem>
+                            <Link
+                              href={getProjectPath(item)}
+                              className="flex items-center truncate"
+                            >
+                              <div
+                                title={`${item.icon ? item.icon : ''} ${item.name}`}
+                                className="truncate"
+                              >{`${item.icon ? item.icon : ''} ${item.name}`}</div>
+                            </Link>
+                          </SidebarMenuButton>
+                          <SettingsProjectModal
+                            trigger={
+                              <Button
+                                variant="ghostSecondary"
+                                size="icon"
+                                type="button"
+                                onClick={(e) => e.stopPropagation()}
+                                className="h-auto w-auto shrink-0 px-2 py-1.5 opacity-0 transition-opacity group-hover/menu-item:opacity-100"
+                              >
+                                <Settings className="h-3! w-3!" />
+                              </Button>
+                            }
+                            project={item}
+                          />
+                          <AccordionTrigger className="w-auto! flex-none! basis-auto! justify-center! p-0.5! py-1! shrink-0 [&>svg]:static [&>svg]:ml-0" />
+                        </AccordionHeader>
+                      </SidebarMenuItem>
+                      <AccordionContent className="ml-3 h-auto pb-0 pt-0">
+                        <PagesSection project={item} />
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
                 ))
               ) : (
                 <SidebarMenuItem>

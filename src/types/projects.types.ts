@@ -12,6 +12,7 @@ export interface ProjectResponse {
   name: string;
   icon: string | null;
   description: string | null;
+  defaultPageId: string | null;
   visibility: ProjectVisibility;
   orderIndex: number;
   isArchived: boolean;
@@ -62,4 +63,8 @@ export interface CreateProjectRequest {
   icon: string | null;
   description: string | null;
   visibility: ProjectVisibility;
+}
+
+export interface SetDefaultPageRequest {
+  pageId: string;
 }

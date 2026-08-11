@@ -37,3 +37,14 @@ export function isWorkspaceAdmin(role?: WorkspaceRole) {
       return false;
   }
 }
+
+export function canUserInteractPage(role: ProjectMemberRole) {
+  switch (role) {
+    case ProjectMemberRole.OWNER:
+      return true;
+    case ProjectMemberRole.EDITOR:
+      return true;
+    default:
+      return false;
+  }
+}

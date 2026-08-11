@@ -22,6 +22,7 @@ import { ProjectsSkeleton } from './projects/projects-skeleton';
 import { SpaceSwitcherSection } from './space-switcher/space-switcher-section';
 import { AppSidebarSkeleton } from './space-switcher/space-switcher-skeleton';
 import { Button } from '../ui/button';
+import { ThemedImage } from '../ui/themed-image';
 
 async function getCurrentWorkspaceId(): Promise<string | undefined> {
   const headersList = await headers();
@@ -43,6 +44,15 @@ export async function AppSidebar({
   return (
     <Sidebar {...props}>
       <SidebarHeader className="gap-0.5">
+        <ThemedImage
+          lightSrc="/linler-logo-light.svg"
+          darkSrc="/linler-logo-dark.svg"
+          alt="Linler Logo"
+          loading="eager"
+          className="my-2 ml-2 h-7 w-fit"
+          width={100}
+          height={100}
+        />
         <Suspense fallback={<AppSidebarSkeleton />}>
           <SpaceSwitcherSection />
         </Suspense>
