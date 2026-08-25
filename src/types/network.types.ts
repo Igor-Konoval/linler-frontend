@@ -1,6 +1,7 @@
 import { ErrorCodes, StatusCodes } from '../constants/http.constants';
 
 export type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
+export type ResponseType = 'auto' | 'json' | 'text' | 'blob';
 
 export interface RequestSettings<TBody = BodyInit | null | undefined> {
   endpoint: string;
@@ -8,6 +9,7 @@ export interface RequestSettings<TBody = BodyInit | null | undefined> {
   method: HttpMethod;
   body?: TBody;
   headers?: HeadersInit;
+  responseType?: ResponseType;
   authorized?: boolean;
   retryOnUnauthorized?: boolean;
 }
@@ -23,4 +25,9 @@ export interface ErrorPayload {
   statusCode: StatusCodes;
   code: ErrorCodes;
   errorMessage: string | string[];
+  fieldErrors?: Record<string, string | string[]>;
 }
+
+export type ActionResult<TData> =
+  | { success: true; data: TData }
+  | { success: false; error: ErrorPayload };

@@ -7,14 +7,14 @@ const jiti = createJiti(fileURLToPath(import.meta.url));
 jiti.import('./src/env/client');
 jiti.import('./src/env/server');
 
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 const nextConfig: NextConfig = {
   output: 'standalone',
 
   reactStrictMode: true,
 
   poweredByHeader: false,
-
-  typedRoutes: true,
 
   experimental: {
     serverActions: {
@@ -23,6 +23,7 @@ const nextConfig: NextConfig = {
   },
 
   images: {
+    dangerouslyAllowLocalIP: isDevelopment,
     remotePatterns: [
       {
         protocol: 'http',

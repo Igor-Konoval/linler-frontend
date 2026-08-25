@@ -1,11 +1,13 @@
-export interface TokenPair {
-  accessToken: string;
-  refreshToken: string;
-  accessExpiresAt: string;
-  refreshExpiresAt: string;
+export interface PaginationMeta {
+  totalItems: number;
+  limit: number;
+  page: number;
+  pageCount: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
 }
 
-export type RefreshResult = {
-  tokens?: TokenPair;
-  statusCode: number;
-};
+export interface PaginationParams {
+  limit: number;
+  page?: number;
+}

@@ -2,11 +2,15 @@ import { ErrorCodes, StatusCodes } from '@/src/constants/http.constants';
 
 import { AuthAdapter } from '@/src/types/adapter.types';
 
-import { ApiResponse, RequestSettings } from '@/src/types/network.types';
+import {
+  ApiResponse,
+  RequestSettings,
+  ResponseType,
+} from '@/src/types/network.types';
 
+import { clientEnv } from '@/src/env/client';
 import { RequestFailure } from '@/src/utils/request-failure.utils';
 import { RequestErrorHandler } from './http-error-handler';
-import { clientEnv } from '@/src/env/client';
 
 export class BaseHttpClient {
   constructor(
@@ -22,7 +26,8 @@ export class BaseHttpClient {
 
     if (
       response.status === StatusCodes.Unauthorized &&
-      settings.retryOnUnauthorized
+      settings.retryOnUnauthorized &&
+      this.authAdapter.supportsRefresh
     ) {
       const retryResult = await this.refreshAndRetry<TResult, TBody>(settings);
 
@@ -31,7 +36,10 @@ export class BaseHttpClient {
       }
     }
 
-    const result = await this.parseResponse<TResult>(response);
+    const result = await this.parseResponse<TResult>(
+      response,
+      settings.responseType,
+    );
 
     if (!result.success) {
       if (result.error) {
@@ -47,17 +55,7 @@ export class BaseHttpClient {
   protected async refreshAndRetry<TResult, TBody>(
     settings: RequestSettings<TBody>,
   ): Promise<TResult | null> {
-    const refreshToken = await this.authAdapter.getRefreshToken();
-
-    if (!refreshToken) {
-      throw new RequestFailure({
-        statusCode: StatusCodes.Unauthorized,
-        code: ErrorCodes.Unauthorized,
-        errorMessage: 'Unauthorized',
-      });
-    }
-
-    const refreshed = await this.authAdapter.refreshToken(refreshToken);
+    const refreshed = await this.authAdapter.refreshToken();
 
     if (!refreshed) {
       throw new RequestFailure({
@@ -72,7 +70,10 @@ export class BaseHttpClient {
       retryOnUnauthorized: false,
     });
 
-    const retryResult = await this.parseResponse<TResult>(retryResponse);
+    const retryResult = await this.parseResponse<TResult>(
+      retryResponse,
+      settings.responseType,
+    );
 
     if (!retryResult.success) {
       if (retryResult.error) {
@@ -112,14 +113,6 @@ export class BaseHttpClient {
   ): Promise<Headers> {
     const headers = new Headers(settings.headers);
 
-    if (settings.authorized) {
-      const accessToken = await this.authAdapter.getAccessToken();
-
-      if (accessToken) {
-        headers.set('Authorization', `Bearer ${accessToken}`);
-      }
-    }
-
     const cookieHeader = await this.authAdapter.getCookieHeader();
 
     if (cookieHeader) {
@@ -146,6 +139,7 @@ export class BaseHttpClient {
 
   protected async parseResponse<TResult>(
     response: Response,
+    responseType: ResponseType = 'auto',
   ): Promise<ApiResponse<TResult>> {
     if (response.status === StatusCodes.NoContent) {
       return {
@@ -155,7 +149,7 @@ export class BaseHttpClient {
       };
     }
 
-    const payload = await this.getResponsePayload(response);
+    const payload = await this.getResponsePayload(response, responseType);
 
     if (response.ok) {
       return {
@@ -172,7 +166,22 @@ export class BaseHttpClient {
     };
   }
 
-  protected async getResponsePayload(response: Response): Promise<unknown> {
+  protected async getResponsePayload(
+    response: Response,
+    responseType: ResponseType = 'auto',
+  ): Promise<unknown> {
+    if (responseType === 'blob') {
+      return response.blob();
+    }
+
+    if (responseType === 'text') {
+      return response.text().catch(() => '');
+    }
+
+    if (responseType === 'json') {
+      return response.json().catch(() => ({}));
+    }
+
     const contentType = response.headers.get('content-type');
     const isJson = contentType?.includes('application/json');
 

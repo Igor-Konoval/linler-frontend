@@ -5,13 +5,23 @@ export const ROUTES = {
   FORGOT_PASSWORD: '/forgot-password',
   RESET_PASSWORD: '/reset-password',
 
+  WORKSPACE: '/workspace',
+
   PROFILE: '/profile',
   SETTINGS: '/settings',
 } as const;
 
-export const LOGIN_QUERY_PARAM = 'login';
-
 export const PATHNAME_HEADER = 'x-current-pathname';
+
+export const PaginationQueryParams = {
+  LIMIT: 'limit',
+  PAGE: 'page',
+};
+
+export const PaginationQueryParamsValues = {
+  LIMIT: 10,
+  PAGE: 1,
+};
 
 export const AUTH_PAGES_URLS_ARRAY = [
   ROUTES.LOGIN,
@@ -20,4 +30,9 @@ export const AUTH_PAGES_URLS_ARRAY = [
   ROUTES.RESET_PASSWORD,
 ];
 
-export const PROTECTED_PAGES_URLS_ARRAY = [ROUTES.PROFILE, ROUTES.SETTINGS];
+export const PROTECTED_PAGES_URLS_ARRAY = [
+  ROUTES.PROFILE,
+  ROUTES.SETTINGS,
+  ROUTES.HOME,
+  ROUTES.WORKSPACE,
+];

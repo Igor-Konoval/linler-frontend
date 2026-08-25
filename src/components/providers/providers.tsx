@@ -1,15 +1,16 @@
 'use client';
 
 import { type JSX, type PropsWithChildren } from 'react';
-import { ThemeProvider } from './theme-provider';
+import { Toaster } from '../ui/toast';
 import { TQueryProvider } from './t-query-provider';
-import { ToastProvider } from '../ui/toast';
+import { ThemeProvider } from './theme-provider';
 
 export function Providers({ children }: PropsWithChildren): JSX.Element {
   return (
     <ThemeProvider>
       <TQueryProvider>
-        <ToastProvider>{children}</ToastProvider>
+        <Toaster />
+        {children}
       </TQueryProvider>
     </ThemeProvider>
   );
