@@ -44,3 +44,23 @@ jobs:
           tags: |
             ghcr.io/igor-konoval/linler-frontend:latest
             ghcr.io/igor-konoval/linler-frontend:${{ github.sha }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pull image and recreate frontend on VPS
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 10m
+          script: |
+            set -e
+            cd /opt/linler-frontend
+            docker compose -f docker-compose.prod.yml pull 
+            docker compose -f docker-compose.prod.yml up -d --no-deps --force-recreate 
+            docker compose -f docker-compose.prod.yml ps
+            docker logs linler-frontend --tail 50
