@@ -20,7 +20,7 @@ import { Button } from '../../ui/button';
 import { AddMemberToWorkspaceModal } from './add-member-to-workspace';
 import { EditWorkspaceMemberModal } from './edit-workspace-member-modal';
 import type { GetWorkspaceMembersResponse } from '@/src/types/workspaces.types';
-import Image from 'next/image';
+import { UserAvatar } from '@/src/components/user-avatar';
 
 export type WorkspaceMembersItem = {
   key: string;
@@ -90,17 +90,12 @@ export function WorkspaceMembersItem({
                   >
                     <SidebarMenuButton asChild isActive={false}>
                       <div>
-                        {item.avatarUrl ? (
-                          <Image
-                            src={item.avatarUrl}
-                            alt="Avatar"
-                            width={24}
-                            height={24}
-                            className="h-6 w-6 rounded-full"
-                          />
-                        ) : (
-                          <div className="h-6 w-6 rounded-full bg-gray-200" />
-                        )}
+                        <UserAvatar
+                          username={item.username}
+                          avatarUrl={item.avatarUrl}
+                          size={24}
+                          className="h-6 w-6"
+                        />
                         <span>{item.username}</span>
                       </div>
                     </SidebarMenuButton>

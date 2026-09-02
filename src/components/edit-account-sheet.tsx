@@ -1,4 +1,3 @@
-import { useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -10,13 +9,7 @@ import {
 import { useDeleteAvatar } from '../hooks/user/use-delete-avatar';
 import { useEditUserAccount } from '../hooks/user/use-edit-user-account';
 import { useEditUserAvatar } from '../hooks/user/use-edit-user-avatar';
-import { GET_USER_QUERY_KEY } from '../hooks/user/use-get-user';
-import {
-  GET_USER_ACCOUNT_QUERY_KEY,
-  useGetUserAccount,
-} from '../hooks/user/use-get-user-account';
-import { GetUserResponse } from '../types/auth.types';
-import { GetUserAccountResponse } from '../types/user.types';
+import { useGetUserAccount } from '../hooks/user/use-get-user-account';
 import { isRequestFailure } from '../utils/request-failure.utils';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -76,7 +69,6 @@ export function EditAccountSheet({
   }, [form, userAccount]);
 
   const [avatar, setAvatar] = useState<File | undefined>(undefined);
-  const queryClient = useQueryClient();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0] || null;
@@ -106,7 +98,7 @@ export function EditAccountSheet({
     return avatar
       ? URL.createObjectURL(avatar)
       : (userAccount?.avatarUrl ?? null);
-  }, [avatar, userAccount?.avatarUrl]);
+  }, [avatar, userAccount]);
 
   const currentUsername = useWatch({
     control: form.control,
@@ -124,19 +116,7 @@ export function EditAccountSheet({
       formData.append('avatar', avatar);
 
       try {
-        const response = await editUserAvatar(formData);
-
-        queryClient.setQueryData<GetUserAccountResponse>(
-          [GET_USER_ACCOUNT_QUERY_KEY],
-          response,
-        );
-
-        queryClient.setQueryData<GetUserResponse>([GET_USER_QUERY_KEY], {
-          id: response.id,
-          email: response.email,
-          username: response.username,
-          avatarUrl: response.avatarUrl,
-        });
+        await editUserAvatar(formData);
 
         setAvatar(undefined);
         toast.success('Avatar updated successfully');
@@ -154,20 +134,8 @@ export function EditAccountSheet({
 
     if (data.username.trim() !== userAccount?.username) {
       try {
-        const response = await editUserAccount({
+        await editUserAccount({
           username: data.username.trim(),
-        });
-
-        queryClient.setQueryData<GetUserAccountResponse>(
-          [GET_USER_ACCOUNT_QUERY_KEY],
-          response,
-        );
-
-        queryClient.setQueryData<GetUserResponse>([GET_USER_QUERY_KEY], {
-          id: response.id,
-          email: response.email,
-          username: response.username,
-          avatarUrl: response.avatarUrl,
         });
 
         toast.success('Username updated successfully');
@@ -186,17 +154,7 @@ export function EditAccountSheet({
 
   const handleDeleteAvatar = async () => {
     try {
-      const response = await deleteAvatar();
-      queryClient.setQueryData<GetUserAccountResponse>(
-        [GET_USER_ACCOUNT_QUERY_KEY],
-        response,
-      );
-      queryClient.setQueryData<GetUserResponse>([GET_USER_QUERY_KEY], {
-        id: response.id,
-        email: response.email,
-        username: response.username,
-        avatarUrl: response.avatarUrl,
-      });
+      await deleteAvatar();
       setAvatar(undefined);
       toast.success('Avatar deleted successfully');
     } catch (error) {

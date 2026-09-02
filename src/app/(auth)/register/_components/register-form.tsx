@@ -63,9 +63,10 @@ export const RegisterForm = () => {
         password: data.password,
       });
 
+      queryClient.clear();
       queryClient.setQueryData<GetUserResponse>([GET_USER_QUERY_KEY], result);
 
-      router.push(ROUTES.HOME);
+      router.replace(ROUTES.HOME);
     } catch (err) {
       applyRequestFailureToForm(form, err);
     }

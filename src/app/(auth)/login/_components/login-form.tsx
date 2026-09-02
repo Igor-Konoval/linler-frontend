@@ -52,6 +52,7 @@ export const LoginForm = () => {
         password: data.password,
       });
 
+      queryClient.clear();
       queryClient.setQueryData<GetUserResponse>([GET_USER_QUERY_KEY], result);
 
       router.replace(ROUTES.HOME);

@@ -162,18 +162,35 @@ a {
   text-decoration-line: none;
 }
 
+.linler-editor {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .linler-editor .tiptap {
   min-height: 420px;
   outline: none;
   font-size: 1.05rem;
   line-height: 1.7;
+  width: 100%;
+  min-width: 0;
   max-width: 100%;
   overflow-x: hidden;
   overflow-wrap: anywhere;
   word-break: break-word;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
-.linler-editor .tiptap > :first-child {
+.linler-editor.linler-editor-nested .tiptap {
+  min-height: 180px;
+  font-size: 1rem;
+  padding: 0.4rem 0.35rem;
+}
+
+.linler-editor .tiptap > :first-child:not(img) {
   margin-top: 0;
 }
 
@@ -338,8 +355,19 @@ a {
 }
 
 .linler-editor .tiptap img {
+  display: inline-block;
   max-width: 100%;
+  margin-block: 0.5rem;
   border-radius: 0.75rem;
+  box-shadow: 0 0 0 2.5px transparent;
+  transition: box-shadow 120ms ease;
+}
+
+.linler-editor:not(.linler-editor-readonly) .tiptap img:hover,
+.linler-editor:not(.linler-editor-readonly)
+  .tiptap
+  img.ProseMirror-selectednode {
+  box-shadow: 0 0 0 2.5px #737373;
 }
 .linler-editor .tiptap .tableWrapper {
   display: block;
@@ -448,6 +476,44 @@ a {
   float: left;
   height: 0;
   pointer-events: none;
+}
+
+.linler-editor .tiptap .node-taskBoard,
+.linler-editor .tiptap .linler-task-board-node,
+.linler-editor .tiptap .linler-task-board-wrap,
+.linler-editor .tiptap .linler-task-board-scroller {
+  display: block;
+  box-sizing: border-box;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.linler-editor .tiptap .node-taskBoard,
+.linler-editor .tiptap .linler-task-board-node {
+  margin: 1rem 0;
+  overflow-x: hidden;
+  overflow-y: visible;
+  contain: inline-size;
+}
+
+.linler-editor .tiptap .linler-task-board-wrap {
+  margin: 0;
+  overflow-x: hidden;
+  overflow-y: visible;
+  contain: inline-size;
+}
+
+.linler-editor .tiptap .linler-task-board-scroller {
+  overflow-x: auto !important;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  contain: inline-size;
+}
+
+body[data-task-board-dragging] .ProseMirror-dropcursor {
+  display: none !important;
 }
 
 /* Linler loading animations */

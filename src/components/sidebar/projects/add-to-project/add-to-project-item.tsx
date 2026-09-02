@@ -14,8 +14,8 @@ import {
 import { ProjectMemberRole } from '@/src/constants/workspaces.constants';
 import { useAddProjectMember } from '@/src/hooks/projects/use-add-project-member';
 import { WorkspaceMemberResponse } from '@/src/types/workspaces.types';
+import { UserAvatar } from '@/src/components/user-avatar';
 import { isRequestFailure } from '@/src/utils/request-failure.utils';
-import Image from 'next/image';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -63,17 +63,12 @@ export function AddToProjectItem({
       key={member.id}
     >
       <div className="flex min-w-0 flex-1 items-center gap-2">
-        {member.avatarUrl ? (
-          <Image
-            src={member.avatarUrl}
-            alt={member.username}
-            width={32}
-            height={32}
-            className="size-8 shrink-0 rounded-full object-cover"
-          />
-        ) : (
-          <div className="size-8 shrink-0 rounded-full bg-gray-200" />
-        )}
+        <UserAvatar
+          username={member.username}
+          avatarUrl={member.avatarUrl}
+          size={32}
+          className="size-8 shrink-0"
+        />
         <div className="flex min-w-0 flex-1 flex-col">
           <span
             className="truncate text-sm font-medium"
