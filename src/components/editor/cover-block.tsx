@@ -2,6 +2,7 @@
 
 import { PageCoverMeta } from '@/src/types/pages.types';
 import { clamp } from '@/src/utils/content-editor.utils';
+import { cn } from '@/src/utils/utils';
 import { RefObject } from 'react';
 import { Button } from '../ui/button';
 import { ImageUp, Trash2 } from 'lucide-react';
@@ -50,7 +51,9 @@ export function CoverBlock({
               <img
                 src={coverUrl}
                 alt={`${title || 'Page'} cover`}
-                className="block w-full rounded-[14px] object-cover"
+                className={cn(
+                  'block w-full rounded-[14px] object-cover shadow-[0_0_0_2.5px_transparent] transition-shadow',
+                )}
                 style={{
                   height: `${clamp(coverMeta.height, 120, 620)}px`,
                   objectPosition: `${clamp(coverMeta.objectPositionX, 0, 100)}% ${clamp(coverMeta.objectPositionY, 0, 100)}%`,

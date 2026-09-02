@@ -1,5 +1,6 @@
 'use client';
 
+import { ROUTES } from '@/src/constants/routes.constants';
 import { useLogout } from '@/src/hooks/auth/use-logout';
 import { useRouter } from 'next/navigation';
 import { Button } from '../ui/button';
@@ -10,7 +11,7 @@ export function LogoutBtn() {
 
   const handleLogout = async () => {
     await logout();
-    router.refresh();
+    router.replace(ROUTES.LOGIN);
   };
 
   return (

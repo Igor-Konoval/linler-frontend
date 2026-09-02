@@ -10,8 +10,22 @@ import type {
   TiptapDocument,
   UpdatePageRequest,
 } from '../types/pages.types';
+import { isTaskBoardNodeType, parseTaskBoardAttrs } from './task-board.utils';
 
 export type ImageResizeMode = 'right' | 'bottom' | 'corner';
+
+export type ImageResizeState = {
+  mode: ImageResizeMode;
+  startX: number;
+  startY: number;
+  startWidth: number;
+  startHeight: number;
+  nextWidth: number;
+  nextHeight: number;
+  imageNodePos: number;
+  ratio: number;
+  imageElement: HTMLImageElement;
+};
 
 export type EditorResizeState = {
   mode: 'left' | 'right';
@@ -223,6 +237,43 @@ export function getBoundedMenuPosition(
   return { x, y };
 }
 
+export function getFixedMenuPosition(
+  clientX: number,
+  clientY: number,
+): { x: number; y: number } {
+  const maxMenuHeight = Math.max(220, window.innerHeight * 0.7);
+
+  let x = clientX;
+  let y = clientY + 8;
+
+  if (x + MENU_MAX_WIDTH + MENU_SIDE_PADDING > window.innerWidth) {
+    x -= MENU_MAX_WIDTH;
+  }
+
+  if (y + maxMenuHeight + MENU_SIDE_PADDING > window.innerHeight) {
+    y -= maxMenuHeight;
+  }
+
+  return {
+    x: clamp(
+      x,
+      MENU_SIDE_PADDING,
+      Math.max(
+        MENU_SIDE_PADDING,
+        window.innerWidth - MENU_MAX_WIDTH - MENU_SIDE_PADDING,
+      ),
+    ),
+    y: clamp(
+      y,
+      MENU_SIDE_PADDING,
+      Math.max(
+        MENU_SIDE_PADDING,
+        window.innerHeight - maxMenuHeight - MENU_SIDE_PADDING,
+      ),
+    ),
+  };
+}
+
 export function getImageResizeMode(
   rect: DOMRect,
   clientX: number,
@@ -321,6 +372,25 @@ export function hydrateContentWithAttachments(
         typeof node.attrs === 'object' && node.attrs !== null
           ? (node.attrs as Record<string, unknown>)
           : {};
+
+      if (isTaskBoardNodeType(node.type)) {
+        const board = parseTaskBoardAttrs(attrs);
+
+        return {
+          ...node,
+          attrs: {
+            ...board,
+            cards: board.cards.map((card) => ({
+              ...card,
+              description: hydrateContentWithAttachments(
+                card.description,
+                attachmentsById,
+              ),
+            })),
+          },
+        };
+      }
+
       const attachmentId =
         typeof attrs.attachmentId === 'string' ? attrs.attachmentId : null;
 
@@ -381,6 +451,22 @@ export function sanitizeContentForSave(
         typeof node.attrs === 'object' && node.attrs !== null
           ? (node.attrs as Record<string, unknown>)
           : {};
+
+      if (isTaskBoardNodeType(node.type)) {
+        const board = parseTaskBoardAttrs(attrs);
+
+        return {
+          ...node,
+          attrs: {
+            ...board,
+            cards: board.cards.map((card) => ({
+              ...card,
+              description: sanitizeContentForSave(card.description),
+            })),
+          },
+        };
+      }
+
       const attachmentId =
         typeof attrs.attachmentId === 'string' ? attrs.attachmentId : null;
 

@@ -1,7 +1,10 @@
 'use client';
 
 import { MenuModeEnum } from '@/src/constants/content-editor.constants';
-import { getBoundedMenuPosition } from '@/src/utils/content-editor.utils';
+import {
+  getBoundedMenuPosition,
+  getFixedMenuPosition,
+} from '@/src/utils/content-editor.utils';
 import { RefObject, SetStateAction, useCallback, useState } from 'react';
 
 export type FloatingMenuState = {
@@ -15,11 +18,15 @@ export type FloatingMenuState = {
 interface FloatingMenuInterface {
   setSlashQuery: (value: SetStateAction<string | null>) => void;
   editorAreaRef: RefObject<HTMLDivElement | null>;
+  placement?: 'absolute' | 'fixed';
+  positionRootRef?: RefObject<HTMLElement | null>;
 }
 
 export function useFloatingMenu({
   setSlashQuery,
   editorAreaRef,
+  placement = 'absolute',
+  positionRootRef,
 }: FloatingMenuInterface) {
   const [floatingMenu, setFloatingMenu] = useState<FloatingMenuState>({
     open: false,
@@ -44,6 +51,23 @@ export function useFloatingMenu({
       mode: MenuModeEnum,
       hasTextSelection: boolean,
     ) => {
+      if (placement === 'fixed') {
+        const { x: viewportX, y: viewportY } = getFixedMenuPosition(
+          clientX,
+          clientY,
+        );
+        const rootRect = positionRootRef?.current?.getBoundingClientRect();
+
+        setFloatingMenu({
+          open: true,
+          x: rootRect ? viewportX - rootRect.left : viewportX,
+          y: rootRect ? viewportY - rootRect.top : viewportY,
+          mode,
+          hasTextSelection,
+        });
+        return;
+      }
+
       const editorRect = editorAreaRef.current?.getBoundingClientRect();
 
       if (!editorRect) {
@@ -60,7 +84,7 @@ export function useFloatingMenu({
         hasTextSelection,
       });
     },
-    [editorAreaRef],
+    [editorAreaRef, placement, positionRootRef],
   );
 
   return {

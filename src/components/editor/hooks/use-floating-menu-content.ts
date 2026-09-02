@@ -19,6 +19,7 @@ import {
   Bold,
   CheckSquare,
   Code2,
+  Columns3,
   FilePlus2,
   Heading1,
   Heading2,
@@ -147,6 +148,7 @@ interface FloatingMenuContentInterface {
   resizeActiveImage: (direction: ImageResizeDirectionEnum) => void;
   deleteCurrentBlock: () => void;
   floatingMenuOpen: boolean;
+  enableTaskBoard?: boolean;
 }
 
 export function useFloatingMenuContent({
@@ -159,6 +161,7 @@ export function useFloatingMenuContent({
   resizeActiveImage,
   deleteCurrentBlock,
   floatingMenuOpen,
+  enableTaskBoard = true,
 }: FloatingMenuContentInterface) {
   const pathname = usePathname();
   const workspaceId = useMemo(() => extractWorkspaceId(pathname), [pathname]);
@@ -344,6 +347,16 @@ export function useFloatingMenuContent({
             .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
             .run(),
       },
+      ...(enableTaskBoard
+        ? [
+            {
+              label: 'Task board',
+              description: 'Kanban columns for tasks',
+              icon: Columns3,
+              execute: () => editor.chain().focus().insertTaskBoard().run(),
+            } satisfies SlashCommand,
+          ]
+        : []),
       {
         label: 'Divider',
         description: 'Separate sections',
@@ -402,7 +415,13 @@ export function useFloatingMenuContent({
         },
       },
     ];
-  }, [editor, insertImageFromUrl, openFilePicker, openImagePicker]);
+  }, [
+    editor,
+    enableTaskBoard,
+    insertImageFromUrl,
+    openFilePicker,
+    openImagePicker,
+  ]);
 
   const quickActions = useMemo<QuickAction[]>(() => {
     if (!editor) return [];
