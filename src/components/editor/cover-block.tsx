@@ -53,8 +53,6 @@ export function CoverBlock({
                 alt={`${title || 'Page'} cover`}
                 className={cn(
                   'block w-full rounded-[14px] object-cover shadow-[0_0_0_2.5px_transparent] transition-shadow',
-                  editable &&
-                    'group-hover/cover:shadow-[0_0_0_2.5px_#737373]',
                 )}
                 style={{
                   height: `${clamp(coverMeta.height, 120, 620)}px`,
