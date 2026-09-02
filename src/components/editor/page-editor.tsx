@@ -21,10 +21,9 @@ import {
   getImageResizeMode,
   getNumberAttr,
   hydrateContentWithAttachments,
-  type ImageResizeMode,
+  type ImageResizeState,
   isImageMimeType,
   normalizeUrl,
-  resolveAtomNodePos,
   resolveImageNodePos,
   sanitizeContentForSave,
   toAttachmentMap,
@@ -36,7 +35,6 @@ import { ArrowDownToLine } from 'lucide-react';
 import type {
   ChangeEvent,
   DragEvent,
-  MouseEvent as ReactMouseEvent,
   PointerEvent as ReactPointerEvent,
 } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -45,6 +43,7 @@ import { Button } from '../ui/button';
 import { CoverBlock } from './cover-block';
 import { FloatingMenu } from './floating-menu';
 import { useEditorConfig } from './hooks/use-editor-config';
+import { useEditorContextMenu } from './hooks/use-editor-context-menu';
 import { useEditorEvents } from './hooks/use-editor-events';
 import { useFloatingMenu } from './hooks/use-floating-menu';
 import { useFloatingMenuContent } from './hooks/use-floating-menu-content';
@@ -58,19 +57,6 @@ export type CoverResizeState = {
   startWidth: number;
   startHeight: number;
   containerWidth: number;
-};
-
-export type ImageResizeState = {
-  mode: ImageResizeMode;
-  startX: number;
-  startY: number;
-  startWidth: number;
-  startHeight: number;
-  nextWidth: number;
-  nextHeight: number;
-  imageNodePos: number;
-  ratio: number;
-  imageElement: HTMLImageElement;
 };
 
 type MediaUploadAnchor = {
@@ -214,6 +200,7 @@ function PageEditorContent({ page }: { page: PageResponse }) {
       isImageResizeInProgressRef,
       setSlashQuery,
       pageId,
+      projectId: page.projectId,
     });
 
   useEffect(
@@ -557,7 +544,7 @@ function PageEditorContent({ page }: { page: PageResponse }) {
       if (!editable) return;
 
       const hasFiles = Array.from(event.dataTransfer.types).includes('Files');
-      if (hasFiles) {
+      if (hasFiles && !document.body.hasAttribute('data-task-board-dragging')) {
         event.preventDefault();
       }
     },
@@ -566,7 +553,13 @@ function PageEditorContent({ page }: { page: PageResponse }) {
 
   const handleEditorDrop = useCallback(
     (event: DragEvent<HTMLDivElement>) => {
-      if (!editable || !editor) return;
+      if (
+        !editable ||
+        !editor ||
+        document.body.hasAttribute('data-task-board-dragging')
+      ) {
+        return;
+      }
 
       const files = Array.from(event.dataTransfer.files ?? []);
       if (files.length === 0) return;
@@ -667,8 +660,12 @@ function PageEditorContent({ page }: { page: PageResponse }) {
       const insideTableCell =
         target.closest('td') !== null || target.closest('th') !== null;
       const insideImage = target.closest('img') !== null;
+      const insideTaskBoard =
+        target.closest('[data-type="task-board"]') !== null;
 
-      setIsEditorEdgeResizeEnabled(!(insideTableCell || insideImage));
+      setIsEditorEdgeResizeEnabled(
+        !(insideTableCell || insideImage || insideTaskBoard),
+      );
 
       const hoveringUploadButton =
         target.closest('[data-media-action-trigger="true"]') !== null;
@@ -839,6 +836,14 @@ function PageEditorContent({ page }: { page: PageResponse }) {
     floatingMenuOpen: floatingMenu.open,
   });
 
+  const handleEditorContextMenu = useEditorContextMenu({
+    editor,
+    editable,
+    floatingMenu,
+    setSlashQuery,
+    openFloatingMenuAtViewportPoint,
+  });
+
   if (!editor) return null;
 
   const runFloatingMenuAction = (command: () => void) => {
@@ -850,61 +855,8 @@ function PageEditorContent({ page }: { page: PageResponse }) {
     closeFloatingMenu();
   };
 
-  const handleEditorContextMenu = (event: ReactMouseEvent<HTMLDivElement>) => {
-    if (!editable) {
-      return;
-    }
-
-    event.preventDefault();
-
-    if (editor.state.selection.empty) {
-      const targetEl = event.target as HTMLElement;
-      const atomEl = targetEl.closest?.(
-        'img, a[data-type="file"], a[data-type="attachment"]',
-      );
-
-      const atomDomPos =
-        atomEl instanceof HTMLElement ? editor.view.posAtDOM(atomEl, 0) : null;
-      const atomPos =
-        typeof atomDomPos === 'number'
-          ? resolveAtomNodePos(editor.state.doc, atomDomPos, [
-              'image',
-              'file',
-              'attachment',
-            ])
-          : null;
-
-      if (atomPos !== null) {
-        editor.chain().focus().setNodeSelection(atomPos).run();
-      } else {
-        const dropPosition = editor.view.posAtCoords({
-          left: event.clientX,
-          top: event.clientY,
-        });
-
-        if (dropPosition) {
-          editor.chain().focus().setTextSelection(dropPosition.pos).run();
-        } else {
-          editor.chain().focus().run();
-        }
-      }
-    }
-
-    const hasTextSelection =
-      !editor.state.selection.empty &&
-      !(editor.state.selection instanceof NodeSelection);
-
-    setSlashQuery(null);
-    openFloatingMenuAtViewportPoint(
-      event.clientX,
-      event.clientY,
-      MenuModeEnum.CONTEXT,
-      hasTextSelection,
-    );
-  };
-
   return (
-    <main className="bg-background min-h-[calc(100vh-var(--header-height))] px-5 py-8 sm:px-10 lg:px-16">
+    <main className="bg-background min-h-[calc(100vh-var(--header-height))] min-w-0 px-5 py-8 sm:px-10 lg:px-16">
       {editable && (
         <>
           <input
@@ -954,10 +906,10 @@ function PageEditorContent({ page }: { page: PageResponse }) {
         removeCover={removeCover}
       />
 
-      <div ref={editorLayoutRef} className="mx-auto w-full max-w-7xl">
+      <div ref={editorLayoutRef} className="mx-auto w-full min-w-0 max-w-7xl">
         <article
           ref={articleRef}
-          className="relative w-full pb-24"
+          className="relative w-full min-w-0 pb-24"
           style={{
             width: editorContentWidth
               ? `min(100%, ${editorContentWidth}px)`
@@ -994,7 +946,7 @@ function PageEditorContent({ page }: { page: PageResponse }) {
 
           <div
             ref={editorAreaRef}
-            className="relative min-h-80 overflow-auto"
+            className="relative min-h-80 min-w-0 overflow-y-auto overflow-x-hidden"
             style={{ minHeight: `${editorMinHeight}px` }}
             onDragOver={handleEditorDragOver}
             onDrop={handleEditorDrop}
@@ -1014,7 +966,7 @@ function PageEditorContent({ page }: { page: PageResponse }) {
             <EditorContent
               editor={editor}
               className={cn(
-                'linler-editor',
+                'linler-editor block w-full min-w-0 max-w-full',
                 !editable && 'linler-editor-readonly',
               )}
             />

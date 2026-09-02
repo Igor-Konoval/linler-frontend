@@ -98,32 +98,45 @@ export function SpaceSwitcher({
               className="w-(--radix-dropdown-menu-trigger-width) scrollbar-thin scrollbar-thumb-sidebar-accent scrollbar-track-sidebar-accent-foreground max-h-[250px] overflow-y-auto"
               align="start"
             >
-              {workspaces?.workspaces.map((workspace) => (
-                <DropdownMenuItem className="py-0" key={workspace.slug}>
-                  <Link
-                    className="h-9.5 flex w-full items-center gap-2"
-                    href={`${ROUTES.WORKSPACE}/${workspace.id}`}
-                    onClick={() => {
-                      setOpenDropdown(false);
-                    }}
-                  >
-                    <GalleryVerticalEnd size={16} />
-                    <span className="truncate">{workspace.name}</span>
-                    {selectedWorkspace !==
-                      SelectedWorkspaceState.NOT_SELECTED &&
-                      workspace.slug === selectedWorkspace?.slug && (
-                        <Check className="ml-auto" />
-                      )}
-                  </Link>
-                  <WorkspaceSettingsButton
-                    onClick={() => {
-                      setSettingsWorkspace(workspace);
-                      setOpenDropdown(false);
-                      setOpenSettingsModal(true);
-                    }}
-                  />
-                </DropdownMenuItem>
-              ))}
+              {workspaces?.workspaces && workspaces?.workspaces.length > 0 ? (
+                workspaces?.workspaces.map((workspace) => (
+                  <DropdownMenuItem className="py-0" key={workspace.slug}>
+                    <div className="h-9.5 flex w-full items-center gap-2">
+                      <Link
+                        className="flex h-full min-w-0 flex-1 items-center gap-2"
+                        href={`${ROUTES.WORKSPACE}/${workspace.id}`}
+                        onClick={() => {
+                          setOpenDropdown(false);
+                        }}
+                      >
+                        <GalleryVerticalEnd size={16} />
+                        <span
+                          className="block max-w-[calc(100%-52px)] truncate"
+                          style={{ minWidth: 0 }}
+                        >
+                          {workspace.name}
+                        </span>
+                        {selectedWorkspace !==
+                          SelectedWorkspaceState.NOT_SELECTED &&
+                          workspace.slug === selectedWorkspace?.slug && (
+                            <Check className="ml-auto" />
+                          )}
+                      </Link>
+                      <WorkspaceSettingsButton
+                        onClick={() => {
+                          setSettingsWorkspace(workspace);
+                          setOpenDropdown(false);
+                          setOpenSettingsModal(true);
+                        }}
+                      />
+                    </div>
+                  </DropdownMenuItem>
+                ))
+              ) : (
+                <div className="p-2 text-sm font-medium">
+                  No workspaces found
+                </div>
+              )}
             </DropdownMenuContent>
           )}
         </DropdownMenu>
@@ -135,7 +148,6 @@ export function SpaceSwitcher({
             workspaceId={settingsWorkspace.id}
             workspaceName={settingsWorkspace.name}
             role={settingsWorkspace.role}
-            slug={settingsWorkspace.slug}
           />
         ) : null}
       </SidebarMenuItem>

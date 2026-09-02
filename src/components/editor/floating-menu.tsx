@@ -8,6 +8,7 @@ import { cn } from '@/src/utils/utils';
 import { Editor } from '@tiptap/core';
 import { useEditorState } from '@tiptap/react';
 import { RefObject, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { type FloatingMenuState } from './hooks/use-floating-menu';
@@ -32,6 +33,8 @@ interface FloatingMenuProps {
   linkPickerItems: LinkPickerItem[];
   selectLinkPickerItem: (item: LinkPickerItem) => void;
   setExternalLinkFromPrompt: () => void;
+  placement?: 'absolute' | 'fixed';
+  portalTarget?: HTMLElement | null;
 }
 
 export function FloatingMenu({
@@ -49,6 +52,8 @@ export function FloatingMenu({
   linkPickerItems,
   selectLinkPickerItem,
   setExternalLinkFromPrompt,
+  placement = 'absolute',
+  portalTarget,
 }: FloatingMenuProps) {
   const setTextColor = useCallback(
     (color: string | null) => {
@@ -119,12 +124,19 @@ export function FloatingMenu({
     },
   });
 
-  return (
-    floatingMenu.open &&
-    editable && (
+  const menu =
+    floatingMenu.open && editable ? (
       <div
         ref={floatingMenuRef}
-        className="bg-popover max-w-75 absolute z-30 w-full overflow-auto rounded-xl border p-2 shadow-xl"
+        data-linler-floating-menu=""
+        className={cn(
+          'bg-popover max-w-75 pointer-events-auto w-full overflow-auto rounded-xl border p-2 shadow-xl',
+          placement === 'fixed' && !portalTarget
+            ? 'fixed z-[80]'
+            : placement === 'fixed'
+              ? 'absolute z-[80]'
+              : 'absolute z-30',
+        )}
         style={{
           left: floatingMenu.x,
           top: floatingMenu.y,
@@ -343,6 +355,15 @@ export function FloatingMenu({
           </p>
         )}
       </div>
-    )
-  );
+    ) : null;
+
+  if (!menu) {
+    return null;
+  }
+
+  if (placement === 'fixed' && typeof document !== 'undefined') {
+    return createPortal(menu, portalTarget ?? document.body);
+  }
+
+  return menu;
 }

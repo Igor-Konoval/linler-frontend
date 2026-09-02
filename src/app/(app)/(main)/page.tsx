@@ -1,3 +1,4 @@
+import { PageContent } from '@/src/app/(app)/(workspaces)/workspace/_components/page-content';
 import { WorkspaceService } from '@/src/api/services/server/workspace.service';
 import { ROUTES } from '@/src/constants/routes.constants';
 import { redirect } from 'next/navigation';
@@ -18,5 +19,5 @@ export default async function Page() {
     redirect(`${ROUTES.WORKSPACE}/${workspaceId}`);
   }
 
-  return <div className="w-full p-4">Hello, World!</div>;
+  return <PageContent />;
 }
