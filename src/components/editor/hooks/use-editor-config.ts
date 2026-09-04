@@ -35,6 +35,7 @@ import {
   FileAttachment,
   LinkChip,
 } from '../extensions';
+import { TaskBoard } from '../task-board/task-board-node';
 import type { FloatingMenuState } from './use-floating-menu';
 
 interface EditorConfigInterface {
@@ -52,6 +53,8 @@ interface EditorConfigInterface {
     hasTextSelection: boolean,
   ) => void;
   pageId: RefObject<string>;
+  projectId: string;
+  enableTaskBoard?: boolean;
 }
 
 export function useEditorConfig({
@@ -64,6 +67,8 @@ export function useEditorConfig({
   openFloatingMenuAtViewportPoint,
   setFloatingMenu,
   pageId,
+  projectId,
+  enableTaskBoard = true,
 }: EditorConfigInterface) {
   const [isUploadingAttachment, setIsUploadingAttachment] = useState(false);
 
@@ -115,8 +120,24 @@ export function useEditorConfig({
       Attachment,
       BlockId,
       CollaborationHighlight,
+      ...(enableTaskBoard
+        ? [
+            TaskBoard.configure({
+              projectId,
+              getPageId: () => pageId.current,
+            }),
+          ]
+        : []),
     ],
     editorProps: {
+      handleDrop: (_view, event) => {
+        if (!document.body.hasAttribute('data-task-board-dragging')) {
+          return false;
+        }
+
+        event.preventDefault();
+        return true;
+      },
       handlePaste: (_view, event) => {
         if (!editable) {
           return false;

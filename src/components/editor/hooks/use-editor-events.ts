@@ -8,26 +8,27 @@ import type {
 import {
   clamp,
   EditorResizeState,
+  type ImageResizeState,
   resolveImageNodePos,
 } from '@/src/utils/content-editor.utils';
 import { RefObject, SetStateAction, useEffect } from 'react';
-import { ImageResizeState, type CoverResizeState } from '../page-editor';
+import type { CoverResizeState } from '../page-editor';
 import { Editor } from '@tiptap/core';
 import { FloatingMenuState } from './use-floating-menu';
 
 interface EditorEventsInterface {
   isImageResizeInProgressRef: RefObject<boolean>;
   scheduleSave: (request: UpdatePageRequest) => void;
-  coverResizeStateRef: RefObject<CoverResizeState | null>;
-  updateCoverMeta: (partial: Partial<PageCoverMeta>) => void;
-  editorResizeStateRef: RefObject<EditorResizeState | null>;
-  setEditorContentOffsetX: (value: SetStateAction<number | null>) => void;
-  setEditorContentWidth: (value: SetStateAction<number | null>) => void;
+  coverResizeStateRef?: RefObject<CoverResizeState | null>;
+  updateCoverMeta?: (partial: Partial<PageCoverMeta>) => void;
+  editorResizeStateRef?: RefObject<EditorResizeState | null>;
+  setEditorContentOffsetX?: (value: SetStateAction<number | null>) => void;
+  setEditorContentWidth?: (value: SetStateAction<number | null>) => void;
   imageResizeStateRef: RefObject<ImageResizeState | null>;
-  articleRef: RefObject<HTMLElement | null>;
-  editorLayoutRef: RefObject<HTMLDivElement | null>;
-  setIsEditorLeftHandleVisible: (value: SetStateAction<boolean>) => void;
-  setIsEditorRightHandleVisible: (value: SetStateAction<boolean>) => void;
+  articleRef?: RefObject<HTMLElement | null>;
+  editorLayoutRef?: RefObject<HTMLDivElement | null>;
+  setIsEditorLeftHandleVisible?: (value: SetStateAction<boolean>) => void;
+  setIsEditorRightHandleVisible?: (value: SetStateAction<boolean>) => void;
   editor: Editor | null;
   floatingMenu: FloatingMenuState;
   floatingMenuRef: RefObject<HTMLDivElement | null>;
@@ -57,10 +58,14 @@ export function useEditorEvents({
       return;
     }
 
-    const handleClickOutside = (event: MouseEvent) => {
-      const targetNode = event.target as Node;
+    const handlePointerDown = (event: PointerEvent) => {
+      if (event.button === 2) {
+        return;
+      }
 
-      if (floatingMenuRef.current?.contains(targetNode)) {
+      const target = event.target;
+
+      if (target instanceof Node && floatingMenuRef.current?.contains(target)) {
         return;
       }
 
@@ -72,23 +77,28 @@ export function useEditorEvents({
         return;
       }
 
+      event.preventDefault();
+      event.stopPropagation();
       closeFloatingMenu();
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEscape);
+    const timeoutId = window.setTimeout(() => {
+      document.addEventListener('pointerdown', handlePointerDown, true);
+    }, 0);
+    document.addEventListener('keydown', handleEscape, true);
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
+      window.clearTimeout(timeoutId);
+      document.removeEventListener('pointerdown', handlePointerDown, true);
+      document.removeEventListener('keydown', handleEscape, true);
     };
   }, [closeFloatingMenu, floatingMenu.open, floatingMenuRef]);
 
   useEffect(() => {
     const handlePointerMove = (event: PointerEvent) => {
       const isResizing = Boolean(
-        coverResizeStateRef.current ||
-          editorResizeStateRef.current ||
+        coverResizeStateRef?.current ||
+          editorResizeStateRef?.current ||
           imageResizeStateRef.current,
       );
 
@@ -96,9 +106,9 @@ export function useEditorEvents({
         event.preventDefault();
       }
 
-      const coverState = coverResizeStateRef.current;
+      const coverState = coverResizeStateRef?.current;
 
-      if (coverState) {
+      if (coverState && updateCoverMeta) {
         const deltaX = event.clientX - coverState.startX;
         const deltaY = event.clientY - coverState.startY;
 
@@ -119,9 +129,13 @@ export function useEditorEvents({
         updateCoverMeta(next);
       }
 
-      const editorWidthState = editorResizeStateRef.current;
+      const editorWidthState = editorResizeStateRef?.current;
 
-      if (editorWidthState) {
+      if (
+        editorWidthState &&
+        setEditorContentOffsetX &&
+        setEditorContentWidth
+      ) {
         const deltaX = event.clientX - editorWidthState.startX;
         const minWidth = 320;
 
@@ -185,12 +199,23 @@ export function useEditorEvents({
     };
 
     const handlePointerUp = () => {
-      coverResizeStateRef.current = null;
+      if (coverResizeStateRef) {
+        coverResizeStateRef.current = null;
+      }
 
-      const editorWidthState = editorResizeStateRef.current;
-      editorResizeStateRef.current = null;
+      const editorWidthState = editorResizeStateRef?.current;
 
-      if (editorWidthState) {
+      if (editorResizeStateRef) {
+        editorResizeStateRef.current = null;
+      }
+
+      if (
+        editorWidthState &&
+        articleRef &&
+        editorLayoutRef &&
+        setEditorContentOffsetX &&
+        setEditorContentWidth
+      ) {
         const articleRect = articleRef.current?.getBoundingClientRect();
         const layoutRect = editorLayoutRef.current?.getBoundingClientRect();
 
@@ -215,8 +240,8 @@ export function useEditorEvents({
         }
       }
 
-      setIsEditorLeftHandleVisible(false);
-      setIsEditorRightHandleVisible(false);
+      setIsEditorLeftHandleVisible?.(false);
+      setIsEditorRightHandleVisible?.(false);
 
       const imageState = imageResizeStateRef.current;
       if (!imageState || !editor) {

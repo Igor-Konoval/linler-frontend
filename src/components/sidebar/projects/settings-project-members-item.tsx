@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import { UserAvatar } from '@/src/components/user-avatar';
 import { formatDateTime } from '@/src/utils/date.utils';
 import { GetProjectMemberResponse } from '@/src/types/projects.types';
 import { useGetWorkspaceRole } from '@/src/hooks/use-get-workspace-role';
@@ -91,17 +91,12 @@ export function SettingsProjectMembersItem({
   return (
     <>
       <div key={member.id} className="flex items-center gap-2">
-        {member.avatarUrl ? (
-          <Image
-            src={member.avatarUrl}
-            alt={member.username}
-            width={56}
-            height={56}
-            className="max-[456px]:min-h-8! max-[456px]:min-w-8! min-[456px]:min-h-14! min-[456px]:min-w-14! rounded-full object-cover"
-          />
-        ) : (
-          <div className="max-[456px]:min-h-8! max-[456px]:min-w-8! min-[456px]:min-h-14! min-[456px]:min-w-14! rounded-full bg-gray-200 object-cover" />
-        )}
+        <UserAvatar
+          username={member.username}
+          avatarUrl={member.avatarUrl}
+          size={56}
+          className="max-[456px]:min-h-8! max-[456px]:min-w-8! min-[456px]:min-h-14! min-[456px]:min-w-14!"
+        />
         <div className="overflow-auto truncate">
           <p className="text-sm font-medium">{member.username}</p>
           <p className="text-sm text-gray-500">{member.email}</p>

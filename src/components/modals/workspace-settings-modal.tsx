@@ -23,11 +23,9 @@ import type { WorkspaceRole } from '@/src/constants/workspaces.constants';
 import { isWorkspaceAdmin } from '@/src/utils/workspaces.utils';
 import { ConfirmationDialog } from '../ui/confirmation-dialog';
 import { useDeleteWorkspace } from '@/src/hooks/workspaces/use-delete-workspace';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { ROUTES } from '@/src/constants/routes.constants';
-import { useQueryClient } from '@tanstack/react-query';
-import { GetWorkspacesResponse } from '@/src/types/workspaces.types';
-import { GET_WORKSPACES_QUERY_KEY } from '@/src/hooks/workspaces/use-get-workspaces';
+import { useCurrentWorkspaceId } from '@/src/hooks/workspaces/use-current-workspace-id';
 import { useLeaveWorkspace } from '@/src/hooks/workspaces/use-leave-workspace';
 import { useEffect } from 'react';
 
@@ -46,7 +44,6 @@ export function WorkspaceSettingsModal({
   workspaceId,
   workspaceName,
   role,
-  slug,
 }: {
   trigger?: React.ReactNode;
   workspaceId: string;
@@ -54,7 +51,6 @@ export function WorkspaceSettingsModal({
   role: WorkspaceRole;
   open: boolean;
   setOpen: (open: boolean) => void;
-  slug: string;
 }) {
   const { mutateAsync: editWorkspace, isPending } = useEditWorkspace();
   const { mutateAsync: deleteWorkspace, isPending: isDeleting } =
@@ -62,9 +58,8 @@ export function WorkspaceSettingsModal({
   const { mutateAsync: leaveWorkspace, isPending: isLeaving } =
     useLeaveWorkspace();
 
-  const pathname = usePathname();
+  const currentWorkspaceId = useCurrentWorkspaceId();
   const router = useRouter();
-  const queryClient = useQueryClient();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -108,22 +103,8 @@ export function WorkspaceSettingsModal({
         toast.success(`You have left from ${workspaceName}`);
       }
 
-      const workspacePath = `${ROUTES.WORKSPACE}/`;
-      const workspaceSlug = pathname.startsWith(workspacePath)
-        ? pathname.slice(workspacePath.length).split('/')[0]
-        : undefined;
-
-      if (workspaceSlug === slug) {
-        const getWorkspaces = queryClient.getQueryData<GetWorkspacesResponse>([
-          GET_WORKSPACES_QUERY_KEY,
-        ]);
-        if (getWorkspaces?.workspaces[0]) {
-          router.replace(
-            `${ROUTES.WORKSPACE}/${getWorkspaces?.workspaces[0].slug}`,
-          );
-        } else {
-          router.replace(ROUTES.HOME);
-        }
+      if (currentWorkspaceId === workspaceId) {
+        router.replace(ROUTES.WORKSPACE);
       }
 
       setOpen(false);

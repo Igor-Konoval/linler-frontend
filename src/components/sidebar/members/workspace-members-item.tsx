@@ -21,12 +21,12 @@ import { Plus, Settings } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { AddMemberToWorkspaceModal } from './add-member-to-workspace';
 import { EditWorkspaceMemberModal } from './edit-workspace-member-modal';
+import { UserAvatar } from '@/src/components/user-avatar';
 import { useIsUserOnline } from '@/src/hooks/realtime/use-workspace-presence';
 import type {
   GetWorkspaceMembersResponse,
   WorkspaceMemberResponse,
 } from '@/src/types/workspaces.types';
-import Image from 'next/image';
 
 export type WorkspaceMembersItem = {
   key: string;
@@ -126,17 +126,12 @@ function WorkspaceMemberRow({
       <SidebarMenuButton asChild isActive={false}>
         <div>
           <span className="relative inline-flex shrink-0">
-            {item.avatarUrl ? (
-              <Image
-                src={item.avatarUrl}
-                alt="Avatar"
-                width={24}
-                height={24}
-                className="h-6 w-6 rounded-full"
-              />
-            ) : (
-              <div className="h-6 w-6 rounded-full bg-gray-200" />
-            )}
+            <UserAvatar
+              username={item.username}
+              avatarUrl={item.avatarUrl}
+              size={24}
+              className="h-6 w-6"
+            />
             {isOnline ? (
               <span
                 aria-label="Online"

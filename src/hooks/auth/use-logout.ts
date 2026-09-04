@@ -1,5 +1,4 @@
 import { AuthService } from '@/src/api/services/client/auth.service';
-import { GET_USER_QUERY_KEY } from '@/src/hooks/user/use-get-user';
 import type { RequestFailure } from '@/src/utils/request-failure.utils';
 import {
   useMutation,
@@ -21,7 +20,7 @@ export const useLogout = (): UseMutationResult<
     mutationKey: [LOGOUT_MUTATION_KEY],
     mutationFn: async () => await AuthService.logout(),
     onSuccess: () => {
-      queryClient.setQueryData([GET_USER_QUERY_KEY], null);
+      queryClient.clear();
     },
   });
 };
