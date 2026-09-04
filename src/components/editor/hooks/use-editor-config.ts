@@ -26,6 +26,8 @@ import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { RefObject, SetStateAction, useCallback, useState } from 'react';
 import { toast } from 'sonner';
+import { BlockId } from '../block-id';
+import { CollaborationHighlight } from '../collaboration-highlight';
 import {
   Attachment,
   AttachmentImage,
@@ -69,10 +71,11 @@ export function useEditorConfig({
     useAttachFile();
   const editor = useEditor({
     immediatelyRender: false,
+    shouldRerenderOnTransaction: false,
     editable,
     content: initialContent,
     extensions: [
-      StarterKit.configure({ link: false }),
+      StarterKit.configure({ link: false, underline: false }),
       Underline,
       TextStyle,
       Color,
@@ -100,7 +103,7 @@ export function useEditorConfig({
       TableKit.configure({
         table: {
           resizable: true,
-          handleWidth: 8,
+          handleWidth: 24,
           cellMinWidth: 120,
           lastColumnResizable: true,
         },
@@ -110,6 +113,8 @@ export function useEditorConfig({
       Callout,
       FileAttachment,
       Attachment,
+      BlockId,
+      CollaborationHighlight,
     ],
     editorProps: {
       handlePaste: (_view, event) => {
@@ -137,8 +142,11 @@ export function useEditorConfig({
         return false;
       },
     },
-    onUpdate: ({ editor: currentEditor }) => {
-      if (isImageResizeInProgressRef.current) {
+    onUpdate: ({ editor: currentEditor, transaction }) => {
+      if (
+        isImageResizeInProgressRef.current ||
+        transaction.getMeta('skipSave')
+      ) {
         return;
       }
 

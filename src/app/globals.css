@@ -168,7 +168,7 @@ a {
   font-size: 1.05rem;
   line-height: 1.7;
   max-width: 100%;
-  overflow-x: hidden;
+  overflow: visible;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
@@ -265,8 +265,53 @@ a {
   padding: 0 0.1rem;
 }
 
-.linler-editor .tiptap a:not(.linler-file):not(.linler-link-chip):hover {
-  background: color-mix(in oklch, var(--bg-primary) 9%, transparent);
+.linler-editor {
+  padding: 1.35rem 8px 0;
+}
+
+.linler-editor .tiptap .collab-block {
+  position: relative;
+  overflow: visible;
+  border-radius: 6px;
+  outline: 2px solid var(--collab-color);
+  outline-offset: -2px;
+}
+
+.linler-editor .tiptap .collab-block-label {
+  position: absolute;
+  top: 0;
+  left: 8px;
+  z-index: 6;
+  transform: translateY(calc(-100% - 3px));
+}
+
+.collab-block-label {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 4px;
+  padding: 0 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #fff;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.collab-chrome {
+  border-radius: 8px;
+  outline: 2px solid var(--collab-color);
+  outline-offset: -2px;
+}
+
+.collab-chrome-labels {
+  position: absolute;
+  top: auto;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 3px;
+  z-index: 20;
+  display: flex;
+  gap: 4px;
 }
 
 .linler-editor .tiptap .linler-link-chip {
@@ -363,6 +408,11 @@ a {
   border: 1px solid var(--border);
   border-radius: 0.5rem;
 }
+
+.linler-editor .tiptap table.collab-block,
+.linler-editor .tiptap .tableWrapper.collab-block {
+  overflow: visible;
+}
 .linler-editor .tiptap th,
 .linler-editor .tiptap td {
   position: relative;
@@ -396,6 +446,23 @@ a {
 
 .linler-editor .tiptap.resize-cursor {
   cursor: col-resize;
+}
+
+@media (pointer: coarse) {
+  .linler-editor:not(.linler-editor-readonly) .tiptap img {
+    touch-action: none;
+  }
+
+  .linler-editor:not(.linler-editor-readonly) .tiptap .tableWrapper,
+  .linler-editor:not(.linler-editor-readonly) .tiptap th,
+  .linler-editor:not(.linler-editor-readonly) .tiptap td {
+    touch-action: pan-y;
+  }
+
+  .linler-editor .tiptap .column-resize-handle {
+    width: 12px;
+    right: -6px;
+  }
 }
 
 @media (max-width: 640px) {

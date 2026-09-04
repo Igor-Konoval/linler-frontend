@@ -1,3 +1,5 @@
+'use client';
+
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -19,7 +21,11 @@ import { Plus, Settings } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { AddMemberToWorkspaceModal } from './add-member-to-workspace';
 import { EditWorkspaceMemberModal } from './edit-workspace-member-modal';
-import type { GetWorkspaceMembersResponse } from '@/src/types/workspaces.types';
+import { useIsUserOnline } from '@/src/hooks/realtime/use-workspace-presence';
+import type {
+  GetWorkspaceMembersResponse,
+  WorkspaceMemberResponse,
+} from '@/src/types/workspaces.types';
 import Image from 'next/image';
 
 export type WorkspaceMembersItem = {
@@ -84,49 +90,11 @@ export function WorkspaceMembersItem({
                 ))
               ) : items && items.members.length > 0 ? (
                 items.members.map((item) => (
-                  <SidebarMenuItem
-                    className="hover:bg-(--sidebar-item-hover) rounded-md transition-colors"
+                  <WorkspaceMemberRow
                     key={item.id}
-                  >
-                    <SidebarMenuButton asChild isActive={false}>
-                      <div>
-                        {item.avatarUrl ? (
-                          <Image
-                            src={item.avatarUrl}
-                            alt="Avatar"
-                            width={24}
-                            height={24}
-                            className="h-6 w-6 rounded-full"
-                          />
-                        ) : (
-                          <div className="h-6 w-6 rounded-full bg-gray-200" />
-                        )}
-                        <span>{item.username}</span>
-                      </div>
-                    </SidebarMenuButton>
-                    {workspaceId ? (
-                      <EditWorkspaceMemberModal
-                        trigger={
-                          <SidebarMenuAction
-                            showOnHover
-                            asChild
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Button
-                              variant="ghostSecondary"
-                              size="icon"
-                              type="button"
-                              className="h-auto w-auto p-2"
-                            >
-                              <Settings className="h-3! w-3!" />
-                            </Button>
-                          </SidebarMenuAction>
-                        }
-                        workspaceId={workspaceId}
-                        member={item}
-                      />
-                    ) : null}
-                  </SidebarMenuItem>
+                    item={item}
+                    workspaceId={workspaceId}
+                  />
                 ))
               ) : (
                 <SidebarMenuItem>
@@ -141,5 +109,66 @@ export function WorkspaceMembersItem({
         <Separator className="my-2" />
       </AccordionItem>
     </SidebarGroup>
+  );
+}
+
+function WorkspaceMemberRow({
+  item,
+  workspaceId,
+}: {
+  item: WorkspaceMemberResponse;
+  workspaceId?: string;
+}) {
+  const isOnline = useIsUserOnline(item.userId);
+
+  return (
+    <SidebarMenuItem className="hover:bg-(--sidebar-item-hover) rounded-md transition-colors">
+      <SidebarMenuButton asChild isActive={false}>
+        <div>
+          <span className="relative inline-flex shrink-0">
+            {item.avatarUrl ? (
+              <Image
+                src={item.avatarUrl}
+                alt="Avatar"
+                width={24}
+                height={24}
+                className="h-6 w-6 rounded-full"
+              />
+            ) : (
+              <div className="h-6 w-6 rounded-full bg-gray-200" />
+            )}
+            {isOnline ? (
+              <span
+                aria-label="Online"
+                className="ring-(--sidebar-background) absolute bottom-0 right-0 size-2 rounded-full bg-emerald-500 ring-2"
+              />
+            ) : null}
+          </span>
+          <span>{item.username}</span>
+        </div>
+      </SidebarMenuButton>
+      {workspaceId ? (
+        <EditWorkspaceMemberModal
+          trigger={
+            <SidebarMenuAction
+              showOnHover
+              asChild
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Button
+                variant="ghostSecondary"
+                size="icon"
+                type="button"
+                className="h-auto w-auto p-2"
+              >
+                <Settings className="h-3! w-3!" />
+              </Button>
+            </SidebarMenuAction>
+          }
+          workspaceId={workspaceId}
+          member={item}
+        />
+      ) : null}
+    </SidebarMenuItem>
   );
 }
