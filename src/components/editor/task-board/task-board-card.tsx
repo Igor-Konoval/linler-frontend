@@ -10,6 +10,8 @@ import type { TaskCard, TaskColumn } from '@/src/types/task-board.types';
 import { formatTaskBoardDate } from '@/src/utils/task-board.utils';
 import { cn } from '@/src/utils/utils';
 import { Calendar, GripVertical } from 'lucide-react';
+import type { RemoteBlockAwareness } from '../collaboration-highlight';
+import { RemoteUserFrame } from '../remote-user-frame';
 import { TaskMemberAvatar } from './task-member-avatar';
 
 export function TaskBoardCard({
@@ -17,6 +19,7 @@ export function TaskBoardCard({
   column,
   members,
   editable,
+  users,
   isDragging,
   insertLine,
   onOpen,
@@ -26,6 +29,7 @@ export function TaskBoardCard({
   column: TaskColumn;
   members: GetProjectMemberResponse[];
   editable: boolean;
+  users: RemoteBlockAwareness[];
   isDragging: boolean;
   insertLine: 'before' | 'after' | null;
   onOpen: () => void;
@@ -39,6 +43,7 @@ export function TaskBoardCard({
   return (
     <div className="relative">
       {insertLine === 'before' ? <DropLine /> : null}
+      <RemoteUserFrame users={users}>
       <article
         data-task-card-id={card.id}
         onClick={onOpen}
@@ -105,6 +110,7 @@ export function TaskBoardCard({
           </span>
         </div>
       </article>
+      </RemoteUserFrame>
       {insertLine === 'after' ? <DropLine /> : null}
     </div>
   );

@@ -19,6 +19,8 @@ import type {
 import { cardsInColumn } from '@/src/utils/task-board.utils';
 import { cn } from '@/src/utils/utils';
 import { Ellipsis, GripVertical, Plus, Trash2 } from 'lucide-react';
+import type { RemoteBlockAwareness } from '../collaboration-highlight';
+import { RemoteUserFrame } from '../remote-user-frame';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,6 +37,8 @@ export function TaskBoardColumn({
   cards,
   members,
   editable,
+  users,
+  cardUsersById,
   isDropTarget,
   draggingCardId,
   insertIndex,
@@ -46,6 +50,7 @@ export function TaskBoardColumn({
   onAddCard,
   onOpenCard,
   onColumnPointerDown,
+  onColumnFocus,
   onCardPointerDown,
   onColumnRef,
 }: {
@@ -53,6 +58,8 @@ export function TaskBoardColumn({
   cards: TaskCard[];
   members: GetProjectMemberResponse[];
   editable: boolean;
+  users: RemoteBlockAwareness[];
+  cardUsersById: Record<string, RemoteBlockAwareness[]>;
   isDropTarget: boolean;
   draggingCardId: string | null;
   insertIndex: number | null;
@@ -64,6 +71,7 @@ export function TaskBoardColumn({
   onAddCard: () => void;
   onOpenCard: (cardId: string) => void;
   onColumnPointerDown: (event: React.PointerEvent<HTMLElement>) => void;
+  onColumnFocus: () => void;
   onCardPointerDown: (
     cardId: string,
     event: React.PointerEvent<HTMLElement>,
@@ -74,6 +82,7 @@ export function TaskBoardColumn({
   const columnCards = cardsInColumn(cards, column.id);
 
   return (
+    <RemoteUserFrame users={users} className="w-64 shrink-0">
     <section
       ref={onColumnRef}
       data-task-column-id={column.id}
@@ -105,6 +114,7 @@ export function TaskBoardColumn({
           <Input
             value={column.name}
             onChange={(event) => onRename(event.target.value)}
+            onFocus={onColumnFocus}
             className="h-7 min-w-0 flex-1 border-transparent bg-transparent px-1 text-sm font-medium shadow-none focus-visible:border-transparent focus-visible:ring-0"
           />
         ) : (
@@ -170,6 +180,7 @@ export function TaskBoardColumn({
             column={column}
             members={members}
             editable={editable}
+            users={cardUsersById[card.id] ?? []}
             isDragging={draggingCardId === card.id}
             insertLine={
               insertIndex === index
@@ -201,5 +212,6 @@ export function TaskBoardColumn({
         </Button>
       ) : null}
     </section>
+    </RemoteUserFrame>
   );
 }

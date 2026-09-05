@@ -17,10 +17,17 @@ export const RealtimeEvent = {
   PAGE_AWARENESS: 'page:awareness',
   PAGE_AWARENESS_SYNC: 'page:awareness-sync',
   PAGE_AWARENESS_REQUEST: 'page:awareness-request',
+  TASK_BOARD_CHANGED: 'task-board:changed',
 } as const;
 
 export const PAGE_TITLE_BLOCK_ID = '__title__';
 export const PAGE_COVER_BLOCK_ID = '__cover__';
+
+export const TASK_BOARD_AWARENESS_PREFIX = 'task-board:';
+export const TASK_CARD_AWARENESS_PREFIX = 'task-card:';
+export const TASK_COLUMN_AWARENESS_PREFIX = 'task-column:';
+export const TASK_DESCRIPTION_BLOCK_ID = '__description__';
+export const TASK_BOARD_BROADCAST_DEBOUNCE_MS = 120;
 
 export type RealtimeEventName =
   (typeof RealtimeEvent)[keyof typeof RealtimeEvent];

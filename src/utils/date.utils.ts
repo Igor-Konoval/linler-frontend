@@ -8,8 +8,8 @@ export function formatDateTime(date: string) {
   });
 }
 
-export function formatRelativeTime(date: string): string {
-  const diffMs = Date.now() - new Date(date).getTime();
+export function formatRelativeTime(date: string, now = Date.now()): string {
+  const diffMs = now - new Date(date).getTime();
   const minutes = Math.max(0, Math.floor(diffMs / 60_000));
 
   if (minutes < 1) {

@@ -7,6 +7,7 @@ import {
   TASK_BOARD_COLUMN_WIDTH_PX,
   TASK_BOARD_COLOR_STYLES,
 } from '@/src/constants/task-board.constants';
+import { useTaskBoardRealtime } from '@/src/hooks/realtime/use-task-board-realtime';
 import { useGetProjectMembers } from '@/src/hooks/projects/use-get-project-members';
 import {
   TaskBoardColor,
@@ -35,6 +36,14 @@ import type { NodeViewProps } from '@tiptap/react';
 import { NodeViewWrapper } from '@tiptap/react';
 import { TaskBoardColumn } from './task-board-column';
 import { TaskCardSheet } from './task-card-sheet';
+import { RemoteUserFrame } from '../remote-user-frame';
+
+type TaskBoardUiState = {
+  search: string;
+  openCardId: string | null;
+};
+
+const boardUiState = new Map<string, TaskBoardUiState>();
 
 type TaskBoardOptions = {
   projectId: string;
@@ -72,6 +81,7 @@ export function TaskBoardView({
   updateAttributes,
   editor,
   extension,
+  getPos,
 }: NodeViewProps) {
   const editable = editor.isEditable;
   const options = extension.options as TaskBoardOptions;
@@ -80,8 +90,12 @@ export function TaskBoardView({
   const board = useMemo(() => parseTaskBoardAttrs(node.attrs), [node.attrs]);
   const { data: membersData } = useGetProjectMembers({ projectId });
   const members = membersData?.members ?? [];
-  const [search, setSearch] = useState('');
-  const [openCardId, setOpenCardId] = useState<string | null>(null);
+  const [search, setSearch] = useState(
+    () => boardUiState.get(board.boardId)?.search ?? '',
+  );
+  const [openCardId, setOpenCardId] = useState<string | null>(
+    () => boardUiState.get(board.boardId)?.openCardId ?? null,
+  );
   const [columnDrag, setColumnDrag] = useState<ColumnDragState | null>(null);
   const [cardDrag, setCardDrag] = useState<CardDragState | null>(null);
   const columnRefs = useRef(new Map<string, HTMLElement>());
@@ -91,12 +105,48 @@ export function TaskBoardView({
   const cardDragRef = useRef<CardDragState | null>(null);
   const boardRef = useRef(board);
   const orderedColumnsRef = useRef<TaskColumn[]>([]);
+  const openCardIdRef = useRef<string | null>(openCardId);
+
+  const getBoardPos = useCallback(() => {
+    if (typeof getPos !== 'function') {
+      return undefined;
+    }
+
+    const pos = getPos();
+    return typeof pos === 'number' ? pos : undefined;
+  }, [getPos]);
+
+  const isBusy = useCallback(
+    () => Boolean(columnDragRef.current || cardDragRef.current),
+    [],
+  );
+
+  const {
+    boardUsers,
+    usersByCardId,
+    usersByColumnId,
+    emitBoardAwareness,
+    emitColumnAwareness,
+    emitCardAwareness,
+    emitCardDescriptionAwareness,
+    holdCardAwareness,
+    releaseCardAwareness,
+    broadcastBoard,
+  } = useTaskBoardRealtime({
+    editor,
+    getPos: getBoardPos,
+    pageId,
+    boardId: board.boardId,
+    enabled: Boolean(pageId && board.boardId),
+    isBusy,
+  });
 
   const persist = useCallback(
     (next: TaskBoardAttrs) => {
       updateAttributes(cloneTaskBoard(next));
+      broadcastBoard(next);
     },
-    [updateAttributes],
+    [broadcastBoard, updateAttributes],
   );
 
   const updateBoard = useCallback(
@@ -124,9 +174,27 @@ export function TaskBoardView({
     cardDragRef.current = cardDrag;
     boardRef.current = board;
     orderedColumnsRef.current = orderedColumns;
-  }, [board, cardDrag, columnDrag, orderedColumns]);
+    openCardIdRef.current = openCardId;
+  }, [board, cardDrag, columnDrag, openCardId, orderedColumns]);
 
   const openCard = board.cards.find((card) => card.id === openCardId) ?? null;
+  const resolvedOpenCardId = openCard?.id ?? null;
+
+  useEffect(() => {
+    boardUiState.set(board.boardId, {
+      search,
+      openCardId: resolvedOpenCardId,
+    });
+  }, [board.boardId, resolvedOpenCardId, search]);
+
+  useEffect(() => {
+    if (!resolvedOpenCardId) {
+      releaseCardAwareness();
+      return;
+    }
+
+    holdCardAwareness(resolvedOpenCardId);
+  }, [holdCardAwareness, releaseCardAwareness, resolvedOpenCardId]);
   const openColumn = openCard
     ? (orderedColumns.find((column) => column.id === openCard.columnId) ?? null)
     : null;
@@ -494,7 +562,13 @@ export function TaskBoardView({
       data-type="task-board"
       className="linler-task-board-wrap"
       onMouseDown={(event: React.MouseEvent) => event.stopPropagation()}
+      onPointerDown={() => {
+        if (!openCardId) {
+          emitBoardAwareness();
+        }
+      }}
     >
+      <RemoteUserFrame users={boardUsers}>
       <div className="mb-3 flex items-center gap-2 px-1 pt-1">
         <div className="relative min-w-0 flex-1">
           <Search className="text-muted-foreground pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2" />
@@ -516,6 +590,8 @@ export function TaskBoardView({
               cards={visibleCards}
               members={members}
               editable={editable}
+              users={usersByColumnId[column.id] ?? []}
+              cardUsersById={usersByCardId}
               isDropTarget={
                 cardDrag?.columnId === column.id ||
                 columnDrag?.toIndex === index
@@ -550,6 +626,7 @@ export function TaskBoardView({
               onColumnPointerDown={(event) =>
                 handleColumnPointerDown(column.id, event)
               }
+              onColumnFocus={() => emitColumnAwareness(column.id)}
               onCardPointerDown={handleCardPointerDown}
               onColumnRef={(element) => {
                 if (element) {
@@ -581,12 +658,24 @@ export function TaskBoardView({
         columns={orderedColumns}
         members={members}
         editable={editable}
+        users={openCard ? (usersByCardId[openCard.id] ?? []) : []}
         pageId={pageId}
         projectId={projectId}
         open={Boolean(openCard)}
         onOpenChange={(nextOpen) => {
           if (!nextOpen) {
             setOpenCardId(null);
+            emitBoardAwareness();
+          }
+        }}
+        onCardAwareness={() => {
+          if (openCard) {
+            emitCardAwareness(openCard.id);
+          }
+        }}
+        onDescriptionAwareness={(blockId) => {
+          if (openCard) {
+            emitCardDescriptionAwareness(openCard.id, blockId);
           }
         }}
         onChange={handleCardChange}
@@ -596,7 +685,7 @@ export function TaskBoardView({
       {columnDrag && draggedColumn && typeof document !== 'undefined'
         ? createPortal(
             <div
-              className="pointer-events-none fixed z-[80] rounded-2xl p-3 shadow-2xl"
+              className="pointer-events-none fixed z-80 rounded-2xl p-3 shadow-2xl"
               style={{
                 left: columnDrag.x,
                 top: columnDrag.y,
@@ -621,7 +710,7 @@ export function TaskBoardView({
       {cardDrag && typeof document !== 'undefined'
         ? createPortal(
             <div
-              className="bg-background pointer-events-none fixed z-[80] rounded-xl p-3 shadow-2xl ring-1 ring-black/10"
+              className="bg-background pointer-events-none fixed z-80 rounded-xl p-3 shadow-2xl ring-1 ring-black/10"
               style={{
                 left: cardDrag.x,
                 top: cardDrag.y,
@@ -635,6 +724,7 @@ export function TaskBoardView({
             document.body,
           )
         : null}
+      </RemoteUserFrame>
     </NodeViewWrapper>
   );
 }

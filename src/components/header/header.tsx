@@ -11,7 +11,7 @@ import { formatRelativeTime } from '@/src/utils/date.utils';
 import { getUserColor } from '@/src/utils/user-color.utils';
 import { Star } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import { SidebarTrigger } from '../sidebar/sidebar';
 import { Button } from '../ui/button';
 import {
@@ -23,22 +23,60 @@ import { Separator } from '../ui/separator';
 import { HeaderDropdownBtn } from './header-dropdown-btn';
 import { PAGE_ACTIVITY_INTERVAL } from '@/src/constants/realtime.constants';
 
+let clientNow = 0;
+const nowListeners = new Set<() => void>();
+let nowTimer: number | null = null;
+
+function subscribeClientNow(onStoreChange: () => void): () => void {
+  nowListeners.add(onStoreChange);
+
+  if (nowTimer === null) {
+    clientNow = Date.now();
+    nowTimer = window.setInterval(() => {
+      clientNow = Date.now();
+
+      for (const listener of nowListeners) {
+        listener();
+      }
+    }, PAGE_ACTIVITY_INTERVAL);
+  }
+
+  return () => {
+    nowListeners.delete(onStoreChange);
+
+    if (nowListeners.size === 0 && nowTimer !== null) {
+      window.clearInterval(nowTimer);
+      nowTimer = null;
+    }
+  };
+}
+
+function getClientNowSnapshot(): number {
+  if (clientNow === 0) {
+    clientNow = Date.now();
+  }
+
+  return clientNow;
+}
+
+function getServerNowSnapshot(): number {
+  return 0;
+}
+
+function useClientNow(): number {
+  return useSyncExternalStore(
+    subscribeClientNow,
+    getClientNowSnapshot,
+    getServerNowSnapshot,
+  );
+}
+
 export function Header() {
   const pageId = useCurrentPageId();
   const { data: page } = useGetProjectPage({ pageId });
   const { data: currentUser } = useGetUser();
   const activity = usePageActivity(pageId);
-  const [, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setNow(Date.now());
-    }, PAGE_ACTIVITY_INTERVAL);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, []);
+  const now = useClientNow();
 
   useEffect(() => {
     if (!page) {
@@ -75,7 +113,7 @@ export function Header() {
         ]
       : [];
   const latest = editors[0];
-  const relativeTime = latest ? formatRelativeTime(latest.updatedAt) : null;
+  const relativeTime = latest && now ? formatRelativeTime(latest.updatedAt, now) : null;
 
   return (
     <header className="h-(--header-height) group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) flex shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
@@ -131,7 +169,7 @@ export function Header() {
                           </p>
                         </div>
                         <p className="text-muted-foreground shrink-0 text-xs">
-                          {formatRelativeTime(editor.updatedAt)}
+                          {formatRelativeTime(editor.updatedAt, now)}
                         </p>
                       </div>
                     );

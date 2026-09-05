@@ -5,6 +5,7 @@ import type {
   WorkspaceInvitationChangeAction,
   WorkspaceMemberChangeAction,
 } from '@/src/constants/realtime.constants';
+import type { TaskBoardAttrs } from '@/src/types/task-board.types';
 
 export type PresenceUser = {
   id: string;
@@ -86,4 +87,12 @@ export type PageAwarenessPayload = {
 export type PageAwarenessSyncPayload = {
   workspaceId: string;
   entries: PageAwarenessPayload[];
+};
+
+export type TaskBoardChangedPayload = {
+  workspaceId: string;
+  pageId: string;
+  boardId: string;
+  board: TaskBoardAttrs;
+  actorUserId: string;
 };

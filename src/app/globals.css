@@ -188,6 +188,7 @@ a {
   min-height: 180px;
   font-size: 1rem;
   padding: 0.4rem 0.35rem;
+  overflow: visible;
 }
 
 .linler-editor .tiptap > :first-child:not(img) {
@@ -571,12 +572,8 @@ a {
   contain: inline-size;
 }
 
-.linler-editor .tiptap .linler-task-board-scroller {
-  overflow-x: auto !important;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-x: contain;
-  contain: inline-size;
+.linler-editor .tiptap .linler-task-board-wrap .collab-chrome {
+  overflow: visible;
 }
 
 body[data-task-board-dragging] .ProseMirror-dropcursor {

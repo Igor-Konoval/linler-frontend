@@ -18,6 +18,7 @@ import type {
 import { getUserColor } from '@/src/utils/user-color.utils';
 import type { Editor } from '@tiptap/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { isTaskAwarenessId } from '@/src/utils/realtime.utils';
 
 function toRemoteAwareness(
   payload: PageAwarenessPayload,
@@ -34,6 +35,21 @@ function toRemoteAwareness(
   };
 }
 
+const editorAwarenessHolds = new Set<string>();
+let lastLocalAwarenessBlockId: string | null = null;
+
+export function holdEditorAwareness(token: string): void {
+  editorAwarenessHolds.add(token);
+}
+
+export function releaseEditorAwareness(token: string): void {
+  editorAwarenessHolds.delete(token);
+}
+
+export function setLastLocalAwarenessBlockId(blockId: string | null): void {
+  lastLocalAwarenessBlockId = blockId;
+}
+
 function applyEditorAwareness(
   editor: Editor | null,
   users: RemoteBlockAwareness[],
@@ -45,7 +61,8 @@ function applyEditorAwareness(
   const editorUsers = users.filter(
     (entry) =>
       entry.blockId !== PAGE_TITLE_BLOCK_ID &&
-      entry.blockId !== PAGE_COVER_BLOCK_ID,
+      entry.blockId !== PAGE_COVER_BLOCK_ID &&
+      !isTaskAwarenessId(entry.blockId),
   );
 
   editor.view.dispatch(
@@ -85,6 +102,7 @@ export function usePageAwareness({
       }
 
       lastBlockIdRef.current = blockId;
+      lastLocalAwarenessBlockId = blockId;
       realtimeClient.emit(RealtimeEvent.PAGE_AWARENESS, {
         workspaceId,
         pageId,
@@ -215,9 +233,14 @@ export function usePageAwareness({
     }
 
     const emitSelection = () => {
+      if (editorAwarenessHolds.size > 0) {
+        return;
+      }
+
       const blockId = getAwarenessBlockId(editor.state.selection.$from);
 
-      if (blockId === lastBlockIdRef.current) {
+      if (blockId === lastLocalAwarenessBlockId) {
+        lastBlockIdRef.current = blockId;
         return;
       }
 
