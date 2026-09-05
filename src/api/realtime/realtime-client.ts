@@ -1,6 +1,7 @@
 import { io, type Socket } from 'socket.io-client';
 import {
   REALTIME_NAMESPACE,
+  REALTIME_SOCKET_PATH,
   RealtimeEvent,
 } from '@/src/constants/realtime.constants';
 import { clientEnv } from '@/src/env/client';
@@ -11,6 +12,17 @@ type RealtimeHandler = (...args: unknown[]) => void;
 function getRealtimeUrl(): string {
   const apiUrl = new URL(clientEnv.NEXT_PUBLIC_API_URL);
   return `${apiUrl.origin}${REALTIME_NAMESPACE}`;
+}
+
+function getRealtimeSocketPath(): string {
+  const apiUrl = new URL(clientEnv.NEXT_PUBLIC_API_URL);
+  const apiPath = apiUrl.pathname.replace(/\/$/, '');
+
+  if (!apiPath || apiPath === '/') {
+    return REALTIME_SOCKET_PATH;
+  }
+
+  return `${apiPath}/socket.io`;
 }
 
 class RealtimeClient {
@@ -32,6 +44,7 @@ class RealtimeClient {
     }
 
     this.socket = io(getRealtimeUrl(), {
+      path: getRealtimeSocketPath(),
       withCredentials: true,
       autoConnect: false,
       transports: ['polling', 'websocket'],
