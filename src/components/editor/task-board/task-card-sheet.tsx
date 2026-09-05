@@ -23,6 +23,8 @@ import type { GetProjectMemberResponse } from '@/src/types/projects.types';
 import { type TaskCard, type TaskColumn } from '@/src/types/task-board.types';
 import { cn } from '@/src/utils/utils';
 import { Trash2 } from 'lucide-react';
+import type { RemoteBlockAwareness } from '../collaboration-highlight';
+import { RemoteUserFrame } from '../remote-user-frame';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +35,7 @@ import {
 } from '../../ui/dropdown-menu';
 import { TaskDescriptionEditor } from './task-description-editor';
 import { TaskMemberAvatar } from './task-member-avatar';
+import { parseTaskCardAwareness } from '@/src/utils/realtime.utils';
 
 export function TaskCardSheet({
   card,
@@ -40,10 +43,13 @@ export function TaskCardSheet({
   columns,
   members,
   editable,
+  users,
   pageId,
   projectId,
   open,
   onOpenChange,
+  onCardAwareness,
+  onDescriptionAwareness,
   onChange,
   onDelete,
 }: {
@@ -52,10 +58,13 @@ export function TaskCardSheet({
   columns: TaskColumn[];
   members: GetProjectMemberResponse[];
   editable: boolean;
+  users: RemoteBlockAwareness[];
   pageId: string;
   projectId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCardAwareness: () => void;
+  onDescriptionAwareness: (blockId: string | null) => void;
   onChange: (cardId: string, patch: Partial<TaskCard>) => void;
   onDelete: (cardId: string) => void;
 }) {
@@ -67,6 +76,14 @@ export function TaskCardSheet({
     return null;
   }
 
+  const titleUsers = users.filter((user) => {
+    const parsed = parseTaskCardAwareness(user.blockId);
+    return Boolean(parsed && !parsed.descriptionBlockId);
+  });
+  const descriptionUsers = users.filter((user) => {
+    const parsed = parseTaskCardAwareness(user.blockId);
+    return Boolean(parsed?.descriptionBlockId);
+  });
   const assignee = members.find((member) => member.userId === card.assigneeId);
 
   return (
@@ -104,20 +121,23 @@ export function TaskCardSheet({
           <SheetDescription className="sr-only">
             Task details and description
           </SheetDescription>
-          {editable ? (
-            <Input
-              value={card.title}
-              placeholder="Untitled"
-              onChange={(event) =>
-                onChange(card.id, { title: event.target.value })
-              }
-              className="mr-7 h-10 border-transparent bg-transparent pl-3 pr-7 text-xl font-semibold shadow-none focus-visible:ring-0"
-            />
-          ) : (
-            <p className="pr-7 text-xl font-semibold">
-              {card.title.trim() || 'Untitled'}
-            </p>
-          )}
+          <RemoteUserFrame users={titleUsers}>
+            {editable ? (
+              <Input
+                value={card.title}
+                placeholder="Untitled"
+                onFocus={onCardAwareness}
+                onChange={(event) =>
+                  onChange(card.id, { title: event.target.value })
+                }
+                className="mr-7 h-10 border-transparent bg-transparent pl-3 pr-7 text-xl font-semibold shadow-none focus-visible:ring-0"
+              />
+            ) : (
+              <p className="pr-7 text-xl font-semibold">
+                {card.title.trim() || 'Untitled'}
+              </p>
+            )}
+          </RemoteUserFrame>
         </SheetHeader>
 
         <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4">
@@ -285,13 +305,16 @@ export function TaskCardSheet({
             <p className="text-muted-foreground mb-2 text-sm">Description</p>
             <TaskDescriptionEditor
               key={card.id}
+              cardId={card.id}
               pageId={pageId}
               projectId={projectId}
               editable={editable}
+              users={descriptionUsers}
               content={card.description}
               onChange={(description: TiptapDocument) =>
                 onChange(card.id, { description })
               }
+              onAwareness={onDescriptionAwareness}
             />
           </div>
         </div>

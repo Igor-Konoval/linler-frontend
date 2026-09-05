@@ -23,13 +23,29 @@ export function getOriginFromUrl(value?: string): string | undefined {
   }
 }
 
+function getWebSocketOrigin(httpOrigin?: string): string | undefined {
+  if (!httpOrigin) {
+    return undefined;
+  }
+
+  try {
+    const url = new URL(httpOrigin);
+    url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
+    return url.origin;
+  } catch {
+    return undefined;
+  }
+}
+
 export function applySecurityHeaders(response: NextResponse): NextResponse {
   const apiOrigin = getOriginFromUrl(process.env.NEXT_PUBLIC_API_URL);
 
   const connectSources = [
     "'self'",
     apiOrigin,
+    getWebSocketOrigin(apiOrigin),
     'https:',
+    'ws:',
     'wss:',
     'blob:',
     'data:',

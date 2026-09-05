@@ -10,6 +10,7 @@ export const DEFAULT_COVER_META: PageCoverMeta = {
 export const MENU_SIDE_PADDING = 8;
 export const MENU_MAX_WIDTH = 300;
 export const IMAGE_RESIZE_HOTSPOT = 10;
+export const IMAGE_RESIZE_HOTSPOT_TOUCH = 32;
 
 // Must mirror the backend's accepted attachment mime types allowlist.
 export const ACCEPTED_IMAGE_MIME_TYPES = [

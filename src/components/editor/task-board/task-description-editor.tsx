@@ -10,6 +10,10 @@ import {
   MenuModeEnum,
 } from '@/src/constants/content-editor.constants';
 import { EMPTY_TASK_DESCRIPTION } from '@/src/constants/task-board.constants';
+import { TASK_DESCRIPTION_BLOCK_ID } from '@/src/constants/realtime.constants';
+import { getAwarenessBlockId } from '@/src/components/editor/block-id';
+import type { RemoteBlockAwareness } from '@/src/components/editor/collaboration-highlight';
+import { RemoteUserFrame } from '@/src/components/editor/remote-user-frame';
 import { useDownloadAttachment } from '@/src/hooks/page/use-download-attachment';
 import { useGetProjectPage } from '@/src/hooks/page/use-get-project-page';
 import type {
@@ -29,7 +33,7 @@ import {
 } from '@/src/utils/content-editor.utils';
 import { cn } from '@/src/utils/utils';
 import { NodeSelection } from '@tiptap/pm/state';
-import { EditorContent } from '@tiptap/react';
+import { EditorContent, type Editor } from '@tiptap/react';
 import { ArrowDownToLine } from 'lucide-react';
 import type {
   ChangeEvent,
@@ -44,6 +48,7 @@ import { useEditorContextMenu } from '../hooks/use-editor-context-menu';
 import { useEditorEvents } from '../hooks/use-editor-events';
 import { useFloatingMenu } from '../hooks/use-floating-menu';
 import { useFloatingMenuContent } from '../hooks/use-floating-menu-content';
+import { parseTaskCardAwareness } from '@/src/utils/realtime.utils';
 
 type MediaUploadAnchor = {
   x: number;
@@ -52,18 +57,91 @@ type MediaUploadAnchor = {
   attachmentId: string | null;
 };
 
+function getUnmatchedDescriptionUsers(
+  editor: Editor | null,
+  users: RemoteBlockAwareness[],
+  cardId: string,
+): RemoteBlockAwareness[] {
+  const presentIds = new Set<string>();
+
+  editor?.state.doc.descendants((node) => {
+    const blockId = node.attrs.blockId as string | null | undefined;
+
+    if (blockId) {
+      presentIds.add(blockId);
+    }
+  });
+
+  return users.filter((user) => {
+    const parsed = parseTaskCardAwareness(user.blockId);
+
+    if (!parsed || parsed.cardId !== cardId || !parsed.descriptionBlockId) {
+      return false;
+    }
+
+    if (parsed.descriptionBlockId === TASK_DESCRIPTION_BLOCK_ID) {
+      return true;
+    }
+
+    return !presentIds.has(parsed.descriptionBlockId);
+  });
+}
+
+function applyDescriptionAwareness(
+  editor: Editor | null,
+  users: RemoteBlockAwareness[],
+  cardId: string,
+): void {
+  if (!editor || editor.isDestroyed) {
+    return;
+  }
+
+  const editorUsers = users.flatMap((user) => {
+    const parsed = parseTaskCardAwareness(user.blockId);
+
+    if (
+      !parsed ||
+      parsed.cardId !== cardId ||
+      !parsed.descriptionBlockId ||
+      parsed.descriptionBlockId === TASK_DESCRIPTION_BLOCK_ID
+    ) {
+      return [];
+    }
+
+    return [
+      {
+        ...user,
+        blockId: parsed.descriptionBlockId,
+      },
+    ];
+  });
+
+  editor.view.dispatch(
+    editor.state.tr
+      .setMeta('pageAwareness', editorUsers)
+      .setMeta('addToHistory', false)
+      .setMeta('skipSave', true),
+  );
+}
+
 export function TaskDescriptionEditor({
+  cardId,
   pageId,
   projectId,
   editable,
+  users,
   content,
   onChange,
+  onAwareness,
 }: {
+  cardId: string;
   pageId: string;
   projectId: string;
   editable: boolean;
+  users: RemoteBlockAwareness[];
   content: TiptapDocument;
   onChange: (content: TiptapDocument) => void;
+  onAwareness: (blockId: string | null) => void;
 }) {
   const [slashQuery, setSlashQuery] = useState<string | null>(null);
   const [editorMinHeight, setEditorMinHeight] = useState(180);
@@ -124,14 +202,27 @@ export function TaskDescriptionEditor({
     positionRootRef: menuPositionRootRef,
   });
 
-  const scheduleSave = useCallback(
-    (request: UpdatePageRequest) => {
-      if (request.content) {
-        onChange(request.content);
-      }
-    },
-    [onChange],
-  );
+  const lastAwarenessRef = useRef<string | null>(null);
+  const onAwarenessRef = useRef(onAwareness);
+  const onChangeRef = useRef(onChange);
+  const usersRef = useRef(users);
+  const lastLocalEditAtRef = useRef(0);
+  const applyingRemoteRef = useRef(false);
+
+  useEffect(() => {
+    onAwarenessRef.current = onAwareness;
+    onChangeRef.current = onChange;
+    usersRef.current = users;
+  }, [onAwareness, onChange, users]);
+
+  const scheduleSave = useCallback((request: UpdatePageRequest) => {
+    if (!request.content || applyingRemoteRef.current) {
+      return;
+    }
+
+    lastLocalEditAtRef.current = Date.now();
+    onChangeRef.current(request.content);
+  }, []);
 
   const { editor, uploadAndInsertAttachments, isUploadingAttachment } =
     useEditorConfig({
@@ -147,6 +238,91 @@ export function TaskDescriptionEditor({
       projectId,
       enableTaskBoard: false,
     });
+
+  useEffect(() => {
+    if (!editor || !editable) {
+      return;
+    }
+
+    const emitSelection = () => {
+      const blockId =
+        getAwarenessBlockId(editor.state.selection.$from) ??
+        TASK_DESCRIPTION_BLOCK_ID;
+
+      if (blockId === lastAwarenessRef.current) {
+        return;
+      }
+
+      lastAwarenessRef.current = blockId;
+      onAwarenessRef.current(blockId);
+    };
+
+    emitSelection();
+    editor.on('selectionUpdate', emitSelection);
+    editor.on('focus', emitSelection);
+
+    return () => {
+      editor.off('selectionUpdate', emitSelection);
+      editor.off('focus', emitSelection);
+    };
+  }, [editable, editor]);
+
+  useEffect(() => {
+    if (!editor || editor.isDestroyed) {
+      return;
+    }
+
+    const nextContent = hydrateContentWithAttachments(
+      content ?? EMPTY_TASK_DESCRIPTION,
+      toAttachmentMap(page?.attachments ?? []),
+    );
+    const locallyEditing = Date.now() - lastLocalEditAtRef.current < 800;
+    const contentChanged =
+      JSON.stringify(editor.getJSON()) !== JSON.stringify(nextContent);
+
+    if (contentChanged && !locallyEditing) {
+      applyingRemoteRef.current = true;
+      editor.chain().setContent(nextContent, { emitUpdate: false }).run();
+      applyingRemoteRef.current = false;
+
+      if (editor.isFocused) {
+        const blockId =
+          getAwarenessBlockId(editor.state.selection.$from) ??
+          TASK_DESCRIPTION_BLOCK_ID;
+        lastAwarenessRef.current = blockId;
+        onAwarenessRef.current(blockId);
+      }
+    }
+
+    applyDescriptionAwareness(editor, users, cardId);
+  }, [cardId, content, editor, page?.attachments, users]);
+
+  useEffect(() => {
+    if (!editor) {
+      return;
+    }
+
+    const onUpdate = ({
+      transaction,
+    }: {
+      transaction: { getMeta: (key: string) => unknown };
+    }) => {
+      if (
+        transaction.getMeta('pageAwareness') ||
+        transaction.getMeta('skipSave')
+      ) {
+        return;
+      }
+
+      applyDescriptionAwareness(editor, usersRef.current, cardId);
+    };
+
+    editor.on('update', onUpdate);
+
+    return () => {
+      editor.off('update', onUpdate);
+    };
+  }, [cardId, editor]);
 
   const removeSlashQuery = useCallback(() => {
     if (!editor) {
@@ -637,13 +813,26 @@ export function TaskDescriptionEditor({
   return (
     <div
       ref={bindEditorArea}
-      className="relative min-w-0 overflow-x-hidden px-1"
+      className="relative min-w-0 overflow-visible px-1"
       style={{ minHeight: `${editorMinHeight}px` }}
       onDragOver={handleEditorDragOver}
       onDrop={handleEditorDrop}
       onContextMenu={handleEditorContextMenu}
       onPointerMove={handleEditorPointerMove}
-      onPointerDown={handleEditorPointerDown}
+      onPointerDown={(event) => {
+        handleEditorPointerDown(event);
+
+        if (!editable || !editor) {
+          return;
+        }
+
+        const blockId =
+          getAwarenessBlockId(editor.state.selection.$from) ??
+          TASK_DESCRIPTION_BLOCK_ID;
+
+        lastAwarenessRef.current = blockId;
+        onAwarenessRef.current(blockId);
+      }}
       onPointerLeave={() => {
         setMediaUploadAnchor(null);
       }}
@@ -677,13 +866,17 @@ export function TaskDescriptionEditor({
         </>
       ) : null}
 
-      <EditorContent
-        editor={editor}
-        className={cn(
-          'linler-editor linler-editor-nested block w-full min-w-0 max-w-full text-sm',
-          !editable && 'linler-editor-readonly',
-        )}
-      />
+      <RemoteUserFrame
+        users={getUnmatchedDescriptionUsers(editor, users, cardId)}
+      >
+        <EditorContent
+          editor={editor}
+          className={cn(
+            'linler-editor linler-editor-nested block w-full min-w-0 max-w-full text-sm',
+            !editable && 'linler-editor-readonly',
+          )}
+        />
+      </RemoteUserFrame>
 
       <FloatingMenu
         editable={editable}

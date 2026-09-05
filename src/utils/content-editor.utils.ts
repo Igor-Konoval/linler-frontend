@@ -1,12 +1,14 @@
 import type { Node as PMNode } from '@tiptap/pm/model';
 import {
   IMAGE_RESIZE_HOTSPOT,
+  IMAGE_RESIZE_HOTSPOT_TOUCH,
   MENU_MAX_WIDTH,
   MENU_SIDE_PADDING,
 } from '../constants/content-editor.constants';
 import type {
   PageAttachment,
   PageCoverMeta,
+  PageResponse,
   TiptapDocument,
   UpdatePageRequest,
 } from '../types/pages.types';
@@ -42,6 +44,26 @@ export type LayoutState = {
   editorContentWidth: number | null;
   editorContentOffsetX: number | null;
 };
+
+export function toPageStamp(updatedAt: string | Date): string {
+  return typeof updatedAt === 'string'
+    ? updatedAt
+    : new Date(updatedAt).toISOString();
+}
+
+export function getPageApplyFingerprint(page: PageResponse): string {
+  return JSON.stringify({
+    updatedAt: toPageStamp(page.updatedAt),
+    title: page.title,
+    cover: page.cover,
+    coverMeta: page.coverMeta,
+    content: page.content,
+    contentWidth: page.contentWidth,
+    contentOffsetX: page.contentOffsetX,
+    width: page.width,
+    height: page.height,
+  });
+}
 
 export function buildPagePatchPayload(
   state: LayoutState,
@@ -237,6 +259,17 @@ export function getBoundedMenuPosition(
   return { x, y };
 }
 
+export function isCoarsePointer(): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    window.matchMedia('(pointer: coarse)').matches
+  );
+}
+
+export function getImageResizeHotspot(): number {
+  return isCoarsePointer() ? IMAGE_RESIZE_HOTSPOT_TOUCH : IMAGE_RESIZE_HOTSPOT;
+}
+
 export function getFixedMenuPosition(
   clientX: number,
   clientY: number,
@@ -279,8 +312,9 @@ export function getImageResizeMode(
   clientX: number,
   clientY: number,
 ): ImageResizeMode | null {
-  const nearRight = rect.right - clientX <= IMAGE_RESIZE_HOTSPOT;
-  const nearBottom = rect.bottom - clientY <= IMAGE_RESIZE_HOTSPOT;
+  const hotspot = getImageResizeHotspot();
+  const nearRight = rect.right - clientX <= hotspot;
+  const nearBottom = rect.bottom - clientY <= hotspot;
 
   if (nearRight && nearBottom) {
     return 'corner';

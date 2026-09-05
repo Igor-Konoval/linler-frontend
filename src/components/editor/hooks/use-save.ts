@@ -41,6 +41,7 @@ export function useSave({
   const { mutateAsync, isPending } = useUpdatePage(projectId);
 
   const save = useCallback(async () => {
+    saveTimer.current = undefined;
     const request = pendingUpdate.current;
     pendingUpdate.current = {};
     if (Object.keys(request).length === 0) return;
@@ -107,5 +108,17 @@ export function useSave({
     [save, coverMetaRef, editorContentWidthRef, editorContentOffsetXRef],
   );
 
-  return { save, scheduleSave, saveState, isSaving: isPending, saveTimer };
+  const hasUnsavedChanges = useCallback(
+    () => Object.keys(pendingUpdate.current).length > 0,
+    [],
+  );
+
+  return {
+    save,
+    scheduleSave,
+    saveState,
+    isSaving: isPending,
+    saveTimer,
+    hasUnsavedChanges,
+  };
 }

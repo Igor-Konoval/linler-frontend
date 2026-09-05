@@ -338,3 +338,10 @@ export function columnShiftPx(
 export function isTaskBoardNodeType(value: unknown): boolean {
   return value === TaskBoardNodeName.TaskBoard;
 }
+
+export function areTaskBoardsEqual(
+  left: TaskBoardAttrs,
+  right: TaskBoardAttrs,
+): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
+}

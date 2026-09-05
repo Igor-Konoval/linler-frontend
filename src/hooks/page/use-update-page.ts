@@ -12,6 +12,7 @@ import type {
   UpdatePageRequest,
 } from '@/src/types/pages.types';
 import { GET_SIDEBAR_PAGES_QUERY_KEY } from './use-get-sidebar-pages';
+import { seedPageActivity } from '@/src/hooks/realtime/use-page-activity';
 
 const UPDATE_PAGE_MUTATION_KEY = 'update-page';
 
@@ -34,6 +35,21 @@ export const useUpdatePage = (
       request: UpdatePageRequest;
     }) => await PagesService.updatePage(pageId, request),
     onSuccess: (data) => {
+      seedPageActivity(
+        data.id,
+        data.recentEditors?.length
+          ? data.recentEditors
+          : data.updatedBy
+            ? [
+                {
+                  id: data.updatedBy.id,
+                  username: data.updatedBy.username,
+                  avatarUrl: data.updatedBy.avatarUrl,
+                  updatedAt: data.updatedAt,
+                },
+              ]
+            : [],
+      );
       queryClient.setQueriesData<GetSidebarPagesResponse>(
         { queryKey: [GET_SIDEBAR_PAGES_QUERY_KEY, projectId] },
         (oldData) => {
