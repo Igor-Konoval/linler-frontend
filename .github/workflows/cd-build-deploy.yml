@@ -6,16 +6,33 @@ on:
 
   workflow_dispatch:
 
+env:
+  IMAGE: ghcr.io/igor-konoval/linler-frontend
+
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
+  build:
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            runner: ubuntu-24.04
+          - platform: linux/arm64
+            runner: ubuntu-24.04-arm
+
+    runs-on: ${{ matrix.runner }}
 
     permissions:
       contents: read
       packages: write
 
     steps:
+      - name: Prepare
+        run: |
+          platform=${{ matrix.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> "$GITHUB_ENV"
+
       - name: Checkout
         uses: actions/checkout@v7
 
@@ -29,26 +46,69 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build and push by digest
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: true
-          platforms: linux/amd64
+          platforms: ${{ matrix.platform }}
           provenance: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
+          cache-from: type=gha,scope=${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=${{ env.PLATFORM_PAIR }}
           build-args: |
             NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
             NEXT_PUBLIC_APP_URL=${{ secrets.NEXT_PUBLIC_APP_URL }}
+          outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true
 
-          tags: |
-            ghcr.io/igor-konoval/linler-frontend:latest
-            ghcr.io/igor-konoval/linler-frontend:${{ github.sha }}
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ env.PLATFORM_PAIR }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    needs: build
+    runs-on: ubuntu-24.04
+
+    permissions:
+      packages: write
+
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create multi-arch manifest
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create \
+            -t "${{ env.IMAGE }}:latest" \
+            -t "${{ env.IMAGE }}:${{ github.sha }}" \
+            $(printf '${{ env.IMAGE }}@sha256:%s ' *)
 
   deploy:
-    needs: build-and-push
+    needs: merge
     runs-on: ubuntu-latest
 
     steps:
@@ -62,7 +122,7 @@ jobs:
           script: |
             set -e
             cd /opt/linler-frontend
-            docker compose -f docker-compose.prod.yml pull 
-            docker compose -f docker-compose.prod.yml up -d --no-deps --force-recreate 
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --no-deps --force-recreate
             docker compose -f docker-compose.prod.yml ps
             docker logs linler-frontend --tail 50
