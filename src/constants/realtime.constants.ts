@@ -1,4 +1,5 @@
 export const REALTIME_NAMESPACE = '/realtime';
+export const REALTIME_SOCKET_PATH = '/api/socket.io';
 
 export const PAGE_ACTIVITY_INTERVAL = 30_000;
 
