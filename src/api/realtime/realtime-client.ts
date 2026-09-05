@@ -34,7 +34,7 @@ class RealtimeClient {
     this.socket = io(getRealtimeUrl(), {
       withCredentials: true,
       autoConnect: false,
-      transports: ['websocket', 'polling'],
+      transports: ['polling', 'websocket'],
       reconnection: true,
       reconnectionDelay: 1_000,
       reconnectionDelayMax: 10_000,
