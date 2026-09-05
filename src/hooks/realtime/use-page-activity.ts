@@ -59,10 +59,7 @@ function mergeEntries(
     .slice(0, 8);
 }
 
-function setPageActivity(
-  pageId: string,
-  incoming: PageActivityEntry[],
-): void {
+function setPageActivity(pageId: string, incoming: PageActivityEntry[]): void {
   const current = activityByPageId.get(pageId) ?? EMPTY_ACTIVITY;
   const next = mergeEntries(current, incoming);
 

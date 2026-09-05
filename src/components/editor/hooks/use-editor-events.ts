@@ -98,8 +98,8 @@ export function useEditorEvents({
     const handlePointerMove = (event: PointerEvent) => {
       const isResizing = Boolean(
         coverResizeStateRef?.current ||
-          editorResizeStateRef?.current ||
-          imageResizeStateRef.current,
+        editorResizeStateRef?.current ||
+        imageResizeStateRef.current,
       );
 
       if (isResizing) {

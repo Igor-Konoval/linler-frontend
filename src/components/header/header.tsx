@@ -113,7 +113,8 @@ export function Header() {
         ]
       : [];
   const latest = editors[0];
-  const relativeTime = latest && now ? formatRelativeTime(latest.updatedAt, now) : null;
+  const relativeTime =
+    latest && now ? formatRelativeTime(latest.updatedAt, now) : null;
 
   return (
     <header className="h-(--header-height) group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) flex shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">

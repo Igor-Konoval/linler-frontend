@@ -35,7 +35,7 @@ import {
 } from '../../ui/dropdown-menu';
 import { TaskDescriptionEditor } from './task-description-editor';
 import { TaskMemberAvatar } from './task-member-avatar';
-import { parseTaskCardAwareness } from '@/src/utils/realtime.utils'
+import { parseTaskCardAwareness } from '@/src/utils/realtime.utils';
 
 export function TaskCardSheet({
   card,

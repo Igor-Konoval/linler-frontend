@@ -10,9 +10,7 @@ import {
   MenuModeEnum,
 } from '@/src/constants/content-editor.constants';
 import { EMPTY_TASK_DESCRIPTION } from '@/src/constants/task-board.constants';
-import {
-  TASK_DESCRIPTION_BLOCK_ID,
-} from '@/src/constants/realtime.constants';
+import { TASK_DESCRIPTION_BLOCK_ID } from '@/src/constants/realtime.constants';
 import { getAwarenessBlockId } from '@/src/components/editor/block-id';
 import type { RemoteBlockAwareness } from '@/src/components/editor/collaboration-highlight';
 import { RemoteUserFrame } from '@/src/components/editor/remote-user-frame';
@@ -50,7 +48,7 @@ import { useEditorContextMenu } from '../hooks/use-editor-context-menu';
 import { useEditorEvents } from '../hooks/use-editor-events';
 import { useFloatingMenu } from '../hooks/use-floating-menu';
 import { useFloatingMenuContent } from '../hooks/use-floating-menu-content';
-import { parseTaskCardAwareness } from '@/src/utils/realtime.utils'
+import { parseTaskCardAwareness } from '@/src/utils/realtime.utils';
 
 type MediaUploadAnchor = {
   x: number;
@@ -304,8 +302,15 @@ export function TaskDescriptionEditor({
       return;
     }
 
-    const onUpdate = ({ transaction }: { transaction: { getMeta: (key: string) => unknown } }) => {
-      if (transaction.getMeta('pageAwareness') || transaction.getMeta('skipSave')) {
+    const onUpdate = ({
+      transaction,
+    }: {
+      transaction: { getMeta: (key: string) => unknown };
+    }) => {
+      if (
+        transaction.getMeta('pageAwareness') ||
+        transaction.getMeta('skipSave')
+      ) {
         return;
       }
 
@@ -861,7 +866,9 @@ export function TaskDescriptionEditor({
         </>
       ) : null}
 
-      <RemoteUserFrame users={getUnmatchedDescriptionUsers(editor, users, cardId)}>
+      <RemoteUserFrame
+        users={getUnmatchedDescriptionUsers(editor, users, cardId)}
+      >
         <EditorContent
           editor={editor}
           className={cn(
