@@ -13,6 +13,8 @@ import {
 import { ProjectMemberRole } from '@/src/constants/workspaces.constants';
 import { useDownloadAttachment } from '@/src/hooks/page/use-download-attachment';
 import { useGetProjectPage } from '@/src/hooks/page/use-get-project-page';
+import { seedPageActivity } from '@/src/hooks/realtime/use-page-activity';
+import { usePageAwareness } from '@/src/hooks/realtime/use-page-awareness';
 import type { PageCoverMeta, PageResponse } from '@/src/types/pages.types';
 import {
   clamp,
@@ -20,6 +22,7 @@ import {
   getAttachmentUrl,
   getImageResizeMode,
   getNumberAttr,
+  getPageApplyFingerprint,
   hydrateContentWithAttachments,
   type ImageResizeState,
   isImageMimeType,
@@ -49,6 +52,7 @@ import { useFloatingMenu } from './hooks/use-floating-menu';
 import { useFloatingMenuContent } from './hooks/use-floating-menu-content';
 import { useSave } from './hooks/use-save';
 import { PageEditorSkeleton } from './page-editor-skeleton';
+import { RemoteUserFrame } from './remote-user-frame';
 
 export type CoverResizeState = {
   mode: CoverResizeModeEnum;
@@ -73,11 +77,7 @@ export function PageEditor({
   pageId: string;
   initialData?: PageResponse;
 }) {
-  const {
-    data: page,
-    isPending,
-    dataUpdatedAt,
-  } = useGetProjectPage({
+  const { data: page, isPending } = useGetProjectPage({
     initialData,
     pageId,
   });
@@ -86,7 +86,7 @@ export function PageEditor({
     return <PageEditorSkeleton />;
   }
 
-  return <PageEditorContent key={`${page.id}-${dataUpdatedAt}`} page={page} />;
+  return <PageEditorContent key={page.id} page={page} />;
 }
 
 function PageEditorContent({ page }: { page: PageResponse }) {
@@ -180,7 +180,7 @@ function PageEditorContent({ page }: { page: PageResponse }) {
     editorAreaRef,
   });
 
-  const { save, saveTimer, scheduleSave } = useSave({
+  const { save, saveTimer, scheduleSave, hasUnsavedChanges } = useSave({
     coverMetaRef,
     editorContentOffsetXRef,
     editorContentWidthRef,
@@ -202,6 +202,111 @@ function PageEditorContent({ page }: { page: PageResponse }) {
       pageId,
       projectId: page.projectId,
     });
+
+  const { titleUsers, coverUsers, emitTitleAwareness, emitCoverAwareness } =
+    usePageAwareness({
+      editor,
+      pageId: page.id,
+      enabled: true,
+    });
+
+  const appliedFingerprintRef = useRef(getPageApplyFingerprint(page));
+
+  useEffect(() => {
+    if (!editor || editor.isDestroyed) {
+      return;
+    }
+
+    const fingerprint = getPageApplyFingerprint(page);
+
+    if (fingerprint === appliedFingerprintRef.current) {
+      return;
+    }
+
+    const applyRemotePage = (): boolean => {
+      if (hasUnsavedChanges()) {
+        return false;
+      }
+
+      const nextContent = hydrateContentWithAttachments(
+        page.content,
+        toAttachmentMap(page.attachments),
+      );
+      const contentChanged =
+        JSON.stringify(editor.getJSON()) !== JSON.stringify(nextContent);
+      const scrollY = window.scrollY;
+      const areaScroll = editorAreaRef.current?.scrollTop ?? 0;
+
+      if (contentChanged) {
+        editor.chain().setContent(nextContent, { emitUpdate: false }).run();
+      }
+
+      setTitle(page.title);
+      setCoverUrl(page.cover);
+      setCoverMeta(
+        page.coverMeta ?? {
+          width: page.width,
+          height: page.height,
+          objectPositionX: page.objectPositionX,
+          objectPositionY: page.objectPositionY,
+        },
+      );
+      setEditorContentWidth(
+        page.contentWidth ?? page.editorMeta?.contentWidth ?? null,
+      );
+      setEditorContentOffsetX(
+        page.contentOffsetX ?? page.editorMeta?.contentOffsetX ?? null,
+      );
+
+      appliedFingerprintRef.current = fingerprint;
+
+      const restoreScroll = () => {
+        window.scrollTo({ top: scrollY, left: 0, behavior: 'auto' });
+        if (editorAreaRef.current) {
+          editorAreaRef.current.scrollTop = areaScroll;
+        }
+      };
+
+      restoreScroll();
+      requestAnimationFrame(restoreScroll);
+      return true;
+    };
+
+    if (applyRemotePage()) {
+      return;
+    }
+
+    let attempts = 0;
+    const retryId = window.setInterval(() => {
+      attempts += 1;
+
+      if (applyRemotePage() || attempts >= 25) {
+        window.clearInterval(retryId);
+      }
+    }, 400);
+
+    return () => {
+      window.clearInterval(retryId);
+    };
+  }, [editor, hasUnsavedChanges, page]);
+
+  useEffect(() => {
+    seedPageActivity(
+      page.id,
+      page.recentEditors?.length
+        ? page.recentEditors
+        : page.updatedBy
+          ? [
+              {
+                id: page.updatedBy.id,
+                username: page.updatedBy.username,
+                avatarUrl: page.updatedBy.avatarUrl,
+                updatedAt: page.updatedAt,
+              },
+            ]
+          : [],
+    );
+  }, [page.id, page.recentEditors, page.updatedAt, page.updatedBy]);
 
   useEffect(
     () => () => {
@@ -778,6 +883,8 @@ function PageEditorContent({ page }: { page: PageResponse }) {
       }
 
       event.preventDefault();
+      event.stopPropagation();
+      target.setPointerCapture(event.pointerId);
       isImageResizeInProgressRef.current = true;
 
       imageResizeStateRef.current = {
@@ -894,17 +1001,21 @@ function PageEditorContent({ page }: { page: PageResponse }) {
         </>
       )}
 
-      <CoverBlock
-        coverContainerRef={coverContainerRef}
-        coverUrl={coverUrl}
-        editable={editable}
-        coverMeta={coverMeta}
-        title={title}
-        openCoverPicker={openCoverPicker}
-        isUploadingCover={isUploadingCover}
-        startCoverResize={startCoverResize}
-        removeCover={removeCover}
-      />
+      <div onPointerDown={editable ? emitCoverAwareness : undefined}>
+        <RemoteUserFrame users={coverUsers}>
+          <CoverBlock
+            coverContainerRef={coverContainerRef}
+            coverUrl={coverUrl}
+            editable={editable}
+            coverMeta={coverMeta}
+            title={title}
+            openCoverPicker={openCoverPicker}
+            isUploadingCover={isUploadingCover}
+            startCoverResize={startCoverResize}
+            removeCover={removeCover}
+          />
+        </RemoteUserFrame>
+      </div>
 
       <div ref={editorLayoutRef} className="mx-auto w-full min-w-0 max-w-7xl">
         <article
@@ -925,24 +1036,27 @@ function PageEditorContent({ page }: { page: PageResponse }) {
                 : undefined,
           }}
         >
-          <div className="flex w-fit gap-1">
-            {page.icon && (
-              <h6 className="mb-5 text-4xl font-bold sm:text-5xl">
-                {page.icon}
-              </h6>
-            )}
-            <input
-              aria-label="Page title"
-              className="placeholder:text-muted-foreground mb-5 w-full border-0 bg-transparent text-4xl font-bold tracking-tight outline-none sm:text-5xl"
-              value={title}
-              disabled={!editable}
-              placeholder="Untitled"
-              onChange={(event) => {
-                setTitle(event.target.value);
-                scheduleSave({ title: event.target.value || 'Untitled' });
-              }}
-            />
-          </div>
+          <RemoteUserFrame users={titleUsers}>
+            <div className="flex w-fit gap-1">
+              {page.icon && (
+                <h6 className="mb-5 text-4xl font-bold sm:text-5xl">
+                  {page.icon}
+                </h6>
+              )}
+              <input
+                aria-label="Page title"
+                className="placeholder:text-muted-foreground mb-5 w-full border-0 bg-transparent text-4xl font-bold tracking-tight outline-none sm:text-5xl"
+                value={title}
+                disabled={!editable}
+                placeholder="Untitled"
+                onFocus={editable ? emitTitleAwareness : undefined}
+                onChange={(event) => {
+                  setTitle(event.target.value);
+                  scheduleSave({ title: event.target.value || 'Untitled' });
+                }}
+              />
+            </div>
+          </RemoteUserFrame>
 
           <div
             ref={editorAreaRef}

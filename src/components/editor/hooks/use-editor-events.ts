@@ -96,6 +96,16 @@ export function useEditorEvents({
 
   useEffect(() => {
     const handlePointerMove = (event: PointerEvent) => {
+      const isResizing = Boolean(
+        coverResizeStateRef?.current ||
+        editorResizeStateRef?.current ||
+        imageResizeStateRef.current,
+      );
+
+      if (isResizing) {
+        event.preventDefault();
+      }
+
       const coverState = coverResizeStateRef?.current;
 
       if (coverState && updateCoverMeta) {
@@ -315,7 +325,9 @@ export function useEditorEvents({
       imageResizeStateRef.current = null;
     };
 
-    document.addEventListener('pointermove', handlePointerMove);
+    document.addEventListener('pointermove', handlePointerMove, {
+      passive: false,
+    });
     document.addEventListener('pointerup', handlePointerUp);
     document.addEventListener('pointercancel', handlePointerUp);
 

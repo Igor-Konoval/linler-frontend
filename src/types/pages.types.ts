@@ -25,6 +25,17 @@ export interface PageResponse {
   editorMeta: PageEditorMeta | null;
   createdById: string;
   updatedById: string;
+  updatedBy?: {
+    id: string;
+    username: string;
+    avatarUrl: string | null;
+  };
+  recentEditors?: Array<{
+    id: string;
+    username: string;
+    avatarUrl: string | null;
+    updatedAt: string;
+  }>;
   attachments: PageAttachment[];
   projectRole: ProjectMemberRole;
   createdAt: string;
