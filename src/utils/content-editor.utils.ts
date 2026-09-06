@@ -193,6 +193,16 @@ export function isImageMimeType(mimeType: string | null | undefined): boolean {
   return typeof mimeType === 'string' && mimeType.startsWith('image/');
 }
 
+export function isExternalFileDrop(dataTransfer: DataTransfer): boolean {
+  const types = Array.from(dataTransfer.types);
+
+  if (!types.includes('Files')) {
+    return false;
+  }
+
+  return !types.includes('text/html');
+}
+
 export function getAttachmentUrl(attachment: PageAttachment): string {
   return attachment.fullUrl || attachment.fileUrl;
 }

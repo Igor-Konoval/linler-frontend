@@ -25,6 +25,7 @@ import {
   getPageApplyFingerprint,
   hydrateContentWithAttachments,
   type ImageResizeState,
+  isExternalFileDrop,
   isImageMimeType,
   normalizeUrl,
   resolveImageNodePos,
@@ -648,8 +649,10 @@ function PageEditorContent({ page }: { page: PageResponse }) {
     (event: DragEvent<HTMLDivElement>) => {
       if (!editable) return;
 
-      const hasFiles = Array.from(event.dataTransfer.types).includes('Files');
-      if (hasFiles && !document.body.hasAttribute('data-task-board-dragging')) {
+      if (
+        isExternalFileDrop(event.dataTransfer) &&
+        !document.body.hasAttribute('data-task-board-dragging')
+      ) {
         event.preventDefault();
       }
     },
@@ -663,6 +666,10 @@ function PageEditorContent({ page }: { page: PageResponse }) {
         !editor ||
         document.body.hasAttribute('data-task-board-dragging')
       ) {
+        return;
+      }
+
+      if (!isExternalFileDrop(event.dataTransfer)) {
         return;
       }
 

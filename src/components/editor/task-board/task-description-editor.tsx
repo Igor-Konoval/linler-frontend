@@ -27,6 +27,7 @@ import {
   getNumberAttr,
   hydrateContentWithAttachments,
   type ImageResizeState,
+  isExternalFileDrop,
   normalizeUrl,
   resolveImageNodePos,
   toAttachmentMap,
@@ -591,9 +592,7 @@ export function TaskDescriptionEditor({
         return;
       }
 
-      const hasFiles = Array.from(event.dataTransfer.types).includes('Files');
-
-      if (hasFiles) {
+      if (isExternalFileDrop(event.dataTransfer)) {
         event.preventDefault();
       }
     },
@@ -603,6 +602,10 @@ export function TaskDescriptionEditor({
   const handleEditorDrop = useCallback(
     (event: DragEvent<HTMLDivElement>) => {
       if (!editable || !editor) {
+        return;
+      }
+
+      if (!isExternalFileDrop(event.dataTransfer)) {
         return;
       }
 
