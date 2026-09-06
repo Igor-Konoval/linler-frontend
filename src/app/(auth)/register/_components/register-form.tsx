@@ -67,6 +67,7 @@ export const RegisterForm = () => {
       queryClient.setQueryData<GetUserResponse>([GET_USER_QUERY_KEY], result);
 
       router.replace(ROUTES.HOME);
+      router.refresh();
     } catch (err) {
       applyRequestFailureToForm(form, err);
     }

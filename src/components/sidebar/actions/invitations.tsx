@@ -1,6 +1,7 @@
 'use client';
 
 import type { GetMineInvitationsResponse } from '@/src/types/workspaces.types';
+import { useGetUser } from '@/src/hooks/user/use-get-user';
 import { useGetMineInvitations } from '@/src/hooks/workspaces/use-get-mine-invitations';
 import { Mails } from 'lucide-react';
 import { Button } from '@/src/components/ui/button';
@@ -27,6 +28,7 @@ export function Invitations({
   initialData?: GetMineInvitationsResponse;
   workspaceId?: string;
 }) {
+  const { data: user } = useGetUser();
   const workspaceId = useCurrentWorkspaceId() ?? initialWorkspaceId;
 
   const workspaceRole = useGetWorkspaceRole(workspaceId);
@@ -41,6 +43,7 @@ export function Invitations({
     isPending,
   } = useGetMineInvitations({
     initialData,
+    userId: user?.id,
     params: { limit: PaginationQueryParamsValues.LIMIT },
   });
 

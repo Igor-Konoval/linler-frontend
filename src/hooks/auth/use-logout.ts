@@ -1,3 +1,4 @@
+import { realtimeClient } from '@/src/api/realtime/realtime-client';
 import { AuthService } from '@/src/api/services/client/auth.service';
 import type { RequestFailure } from '@/src/utils/request-failure.utils';
 import {
@@ -20,6 +21,7 @@ export const useLogout = (): UseMutationResult<
     mutationKey: [LOGOUT_MUTATION_KEY],
     mutationFn: async () => await AuthService.logout(),
     onSuccess: () => {
+      realtimeClient.disconnect();
       queryClient.clear();
     },
   });

@@ -9,10 +9,9 @@ import { useGetUser } from '@/src/hooks/user/use-get-user';
 import { useCurrentPageId } from '@/src/hooks/workspaces/use-current-page-id';
 import { formatRelativeTime } from '@/src/utils/date.utils';
 import { getUserColor } from '@/src/utils/user-color.utils';
-import { Star } from 'lucide-react';
-import Image from 'next/image';
 import { useEffect, useSyncExternalStore } from 'react';
 import { SidebarTrigger } from '../sidebar/sidebar';
+import { UserAvatar } from '../user-avatar';
 import { Button } from '../ui/button';
 import {
   HoverCard,
@@ -149,21 +148,13 @@ export function Header() {
                             className="relative inline-flex shrink-0"
                             style={{ color }}
                           >
-                            {editor.avatarUrl ? (
-                              <Image
-                                src={editor.avatarUrl}
-                                alt=""
-                                width={20}
-                                height={20}
-                                className="h-5 w-5 rounded-full"
-                                style={{ boxShadow: `0 0 0 2px ${color}` }}
-                              />
-                            ) : (
-                              <span
-                                className="h-5 w-5 rounded-full bg-gray-200"
-                                style={{ boxShadow: `0 0 0 2px ${color}` }}
-                              />
-                            )}
+                            <UserAvatar
+                              username={editor.username}
+                              avatarUrl={editor.avatarUrl}
+                              size={20}
+                              className="h-5 w-5"
+                              style={{ boxShadow: `0 0 0 2px ${color}` }}
+                            />
                           </span>
                           <p className="truncate">
                             Edited by <b>{name}</b>
@@ -179,17 +170,6 @@ export function Header() {
               </HoverCardContent>
             </HoverCard>
           ) : null}
-
-          <HoverCard openDelay={200}>
-            <HoverCardTrigger className="px-1" asChild>
-              <Button variant="ghost">
-                <Star />
-              </Button>
-            </HoverCardTrigger>
-            <HoverCardContent className="w-fit">
-              <p>Add to Favorites</p>
-            </HoverCardContent>
-          </HoverCard>
 
           <HeaderDropdownBtn />
         </div>

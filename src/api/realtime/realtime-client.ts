@@ -35,11 +35,12 @@ class RealtimeClient {
       return;
     }
 
-    if (this.socket) {
-      if (!this.socket.connected) {
-        this.socket.connect();
-      }
+    if (this.socket?.connected) {
+      return;
+    }
 
+    if (this.socket) {
+      this.socket.connect();
       return;
     }
 
