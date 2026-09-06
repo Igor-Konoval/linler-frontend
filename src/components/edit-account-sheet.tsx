@@ -222,11 +222,14 @@ export function EditAccountSheet({
                 />
               ) : (
                 <div
-                  className="aspect-square h-full w-full cursor-pointer rounded-lg bg-gray-200 object-cover"
+                  className="flex aspect-square h-full w-full cursor-pointer items-center justify-center rounded-lg bg-[#dedede] text-4xl font-medium text-neutral-600 dark:bg-muted dark:text-muted-foreground"
                   onClick={() =>
                     document.getElementById('avatar-upload')?.click()
                   }
-                />
+                >
+                  {userAccount?.username?.trim().slice(0, 1).toUpperCase() ||
+                    '?'}
+                </div>
               )}
             </div>
 

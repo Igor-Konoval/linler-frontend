@@ -139,7 +139,7 @@ function WorkspaceMemberRow({
               />
             ) : null}
           </span>
-          <span>{item.username}</span>
+          <span title={item.username}>{item.username}</span>
         </div>
       </SidebarMenuButton>
       {workspaceId ? (

@@ -5,6 +5,7 @@ import type {
   WorkspaceInvitationChangeAction,
   WorkspaceMemberChangeAction,
 } from '@/src/constants/realtime.constants';
+import type { NotificationResponse } from '@/src/types/notifications.types';
 import type { TaskBoardAttrs } from '@/src/types/task-board.types';
 
 export type PresenceUser = {
@@ -95,4 +96,8 @@ export type TaskBoardChangedPayload = {
   boardId: string;
   board: TaskBoardAttrs;
   actorUserId: string;
+};
+
+export type NotificationCreatedPayload = {
+  notification: NotificationResponse;
 };

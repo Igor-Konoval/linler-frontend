@@ -7,13 +7,14 @@ import {
   SidebarRail,
 } from '@/src/components/sidebar/sidebar';
 import { PATHNAME_HEADER, ROUTES } from '@/src/constants/routes.constants';
-import { Bell, Lightbulb } from 'lucide-react';
+import { Lightbulb } from 'lucide-react';
 import { headers } from 'next/headers';
 import { Suspense } from 'react';
 import { SIDEBAR_NAV_DEFAULT_OPEN } from '../../constants/sidebar-nav.constants';
 import { Accordion } from '../ui/accordion';
 import { InvitationSkeleton } from './actions/invitation-skeleton';
 import { InvitationsSection } from './actions/invitations-section';
+import { NotificationsSection } from './actions/notifications-section';
 import { AddWorkspaceButton } from './add-workspace-button';
 import { MembersSection } from './members/members-section';
 import { MembersSkeleton } from './members/members-skeleton';
@@ -21,7 +22,6 @@ import { ProjectsSection } from './projects/projects-section';
 import { ProjectsSkeleton } from './projects/projects-skeleton';
 import { SpaceSwitcherSection } from './space-switcher/space-switcher-section';
 import { AppSidebarSkeleton } from './space-switcher/space-switcher-skeleton';
-import { Button } from '../ui/button';
 import { ThemedImage } from '../ui/themed-image';
 
 async function getCurrentWorkspaceId(): Promise<string | undefined> {
@@ -64,14 +64,9 @@ export async function AppSidebar({
           <Suspense fallback={<InvitationSkeleton />}>
             <InvitationsSection workspaceId={currentWorkspaceId} />
           </Suspense>
-          <div className="flex items-center gap-2 pr-2">
-            <Button
-              variant="ghost"
-              className="hover:bg-(--sidebar-item-hover)! ml-2 w-full justify-start"
-            >
-              <Bell /> Notifications
-            </Button>
-          </div>
+          <Suspense fallback={<InvitationSkeleton />}>
+            <NotificationsSection />
+          </Suspense>
         </SidebarGroup>
       </SidebarHeader>
       <SidebarContent>

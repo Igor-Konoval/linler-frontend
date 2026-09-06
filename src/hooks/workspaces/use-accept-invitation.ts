@@ -8,6 +8,8 @@ import {
   useQueryClient,
   type UseMutationResult,
 } from '@tanstack/react-query';
+import { GET_PROJECTS_QUERY_KEY } from '@/src/hooks/projects/use-get-projects';
+import { GET_WORKSPACE_MEMBERS_QUERY_KEY } from './use-get-workspace-members';
 import { GET_WORKSPACES_QUERY_KEY } from './use-get-workspaces';
 import { WorkspaceService } from '@/src/api/services/client/workspace.service';
 
@@ -33,11 +35,24 @@ export const useAcceptInvitation = (): UseMutationResult<
         (oldData) => {
           if (!oldData) return oldData;
 
+          const alreadyInList = oldData.workspaces.some(
+            (workspace) => workspace.id === data.id,
+          );
+
           return {
-            workspaces: [...oldData.workspaces, data],
+            workspaces: alreadyInList
+              ? oldData.workspaces
+              : [...oldData.workspaces, data],
           };
         },
       );
+
+      void queryClient.invalidateQueries({
+        queryKey: [GET_WORKSPACE_MEMBERS_QUERY_KEY, data.id],
+      });
+      void queryClient.invalidateQueries({
+        queryKey: [GET_PROJECTS_QUERY_KEY, data.id],
+      });
     },
   });
 };
