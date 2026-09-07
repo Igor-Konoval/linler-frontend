@@ -126,7 +126,7 @@ export function ProjectsItem({
                                 size="icon"
                                 type="button"
                                 onClick={(e) => e.stopPropagation()}
-                                className="h-auto w-auto shrink-0 px-2 py-1.5 opacity-0 transition-opacity group-hover/menu-item:opacity-100"
+                                className="h-auto w-auto shrink-0 px-2 py-1.5 opacity-100 transition-opacity md:opacity-0 md:group-hover/menu-item:opacity-100 md:group-focus-within/menu-item:opacity-100"
                               >
                                 <Settings className="h-3! w-3!" />
                               </Button>

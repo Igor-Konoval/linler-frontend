@@ -148,14 +148,10 @@ export function TaskDescriptionEditor({
   const [editorMinHeight, setEditorMinHeight] = useState(180);
   const [mediaUploadAnchor, setMediaUploadAnchor] =
     useState<MediaUploadAnchor | null>(null);
-  const [menuPortalTarget, setMenuPortalTarget] = useState<HTMLElement | null>(
-    null,
-  );
 
   const [seedContent] = useState(content ?? EMPTY_TASK_DESCRIPTION);
   const pageIdRef = useRef(pageId);
   const editorAreaRef = useRef<HTMLDivElement | null>(null);
-  const menuPositionRootRef = useRef<HTMLElement | null>(null);
   const floatingMenuRef = useRef<HTMLDivElement | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -184,11 +180,6 @@ export function TaskDescriptionEditor({
 
   const bindEditorArea = useCallback((node: HTMLDivElement | null) => {
     editorAreaRef.current = node;
-    const root =
-      node?.closest<HTMLElement>('[data-slot="sheet-content"]') ?? node;
-
-    menuPositionRootRef.current = root;
-    setMenuPortalTarget(root);
   }, []);
 
   const {
@@ -200,7 +191,6 @@ export function TaskDescriptionEditor({
     setSlashQuery,
     editorAreaRef,
     placement: 'fixed',
-    positionRootRef: menuPositionRootRef,
   });
 
   const lastAwarenessRef = useRef<string | null>(null);
@@ -897,7 +887,6 @@ export function TaskDescriptionEditor({
         selectLinkPickerItem={selectLinkPickerItem}
         setExternalLinkFromPrompt={setExternalLinkFromPrompt}
         placement="fixed"
-        portalTarget={menuPortalTarget}
       />
 
       {editable && mediaUploadAnchor ? (

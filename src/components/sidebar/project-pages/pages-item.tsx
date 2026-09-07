@@ -133,7 +133,7 @@ export function PagesItem({
                   size="icon"
                   type="button"
                   onClick={(e) => e.stopPropagation()}
-                  className="mr-7.5 ml-1 h-auto w-auto shrink-0 px-1 py-2 opacity-0 transition-opacity group-hover/menu-item:opacity-100"
+                  className="mr-7.5 ml-1 h-auto w-auto shrink-0 px-1 py-2 opacity-100 transition-opacity md:opacity-0 md:group-hover/menu-item:opacity-100 md:group-focus-within/menu-item:opacity-100"
                 >
                   <Settings className="h-3! w-3!" />
                 </Button>
