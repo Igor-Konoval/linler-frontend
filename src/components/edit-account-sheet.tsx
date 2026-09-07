@@ -222,7 +222,7 @@ export function EditAccountSheet({
                 />
               ) : (
                 <div
-                  className="flex aspect-square h-full w-full cursor-pointer items-center justify-center rounded-lg bg-[#dedede] text-4xl font-medium text-neutral-600 dark:bg-muted dark:text-muted-foreground"
+                  className="dark:bg-muted dark:text-muted-foreground flex aspect-square h-full w-full cursor-pointer items-center justify-center rounded-lg bg-[#dedede] text-4xl font-medium text-neutral-600"
                   onClick={() =>
                     document.getElementById('avatar-upload')?.click()
                   }

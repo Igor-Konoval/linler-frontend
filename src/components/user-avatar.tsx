@@ -37,7 +37,7 @@ export function UserAvatar({
   return (
     <span
       className={cn(
-        'inline-flex items-center justify-center rounded-full font-medium select-none bg-[#dedede] text-neutral-600 dark:bg-muted dark:text-muted-foreground',
+        'dark:bg-muted dark:text-muted-foreground inline-flex select-none items-center justify-center rounded-full bg-[#dedede] font-medium text-neutral-600',
         className,
       )}
       style={{

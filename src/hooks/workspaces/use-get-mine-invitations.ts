@@ -27,7 +27,11 @@ export const useGetMineInvitations = ({
     GetMineInvitationsResponse,
     RequestFailure,
     InfiniteData<GetMineInvitationsResponse>,
-    [typeof GET_MINE_INVITATIONS_QUERY_KEY, string | undefined, PaginationParams],
+    [
+      typeof GET_MINE_INVITATIONS_QUERY_KEY,
+      string | undefined,
+      PaginationParams,
+    ],
     number
   >({
     queryKey: [GET_MINE_INVITATIONS_QUERY_KEY, userId, params],

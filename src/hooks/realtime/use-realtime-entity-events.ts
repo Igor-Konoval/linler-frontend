@@ -209,7 +209,10 @@ export function useRealtimeEntityEvents(): void {
       onProjectMemberChanged,
     );
     realtimeClient.on(RealtimeEvent.PAGE_CHANGED, onPageChanged);
-    realtimeClient.on(RealtimeEvent.NOTIFICATION_CREATED, onNotificationCreated);
+    realtimeClient.on(
+      RealtimeEvent.NOTIFICATION_CREATED,
+      onNotificationCreated,
+    );
     realtimeClient.on(RealtimeEvent.PRESENCE_JOINED, onPresenceJoined);
 
     return () => {
