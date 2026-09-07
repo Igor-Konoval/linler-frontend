@@ -91,7 +91,7 @@ export function TaskCardSheet({
       <SheetContent
         side="right"
         className={cn(
-          'flex w-full flex-col gap-0 overflow-hidden data-[side=right]:sm:max-w-2xl',
+          'flex w-full flex-col gap-0 overflow-x-hidden overflow-y-visible data-[side=right]:sm:max-w-2xl',
           isMobile && 'max-w-screen! w-screen!',
         )}
         onOpenAutoFocus={(event) => event.preventDefault()}
@@ -140,7 +140,7 @@ export function TaskCardSheet({
           </RemoteUserFrame>
         </SheetHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4">
+        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain p-4">
           <PropertyRow label="Status">
             {editable ? (
               <DropdownMenu>

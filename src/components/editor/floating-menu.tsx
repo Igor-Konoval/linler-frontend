@@ -130,18 +130,22 @@ export function FloatingMenu({
         ref={floatingMenuRef}
         data-linler-floating-menu=""
         className={cn(
-          'bg-popover max-w-75 pointer-events-auto w-full overflow-auto rounded-xl border p-2 shadow-xl',
+          'bg-popover max-w-75 pointer-events-auto w-full overflow-y-scroll overscroll-contain rounded-xl border p-2 shadow-xl [-webkit-overflow-scrolling:touch]',
           placement === 'fixed' && !portalTarget
-            ? 'fixed z-[80]'
+            ? 'fixed z-80'
             : placement === 'fixed'
-              ? 'absolute z-[80]'
+              ? 'absolute z-80'
               : 'absolute z-30',
         )}
         style={{
           left: floatingMenu.x,
           top: floatingMenu.y,
-          maxHeight: '70vh',
+          maxHeight: 'min(70dvh, 70vh)',
+          touchAction: 'pan-y',
         }}
+        onPointerDown={(event) => event.stopPropagation()}
+        onWheel={(event) => event.stopPropagation()}
+        onTouchMove={(event) => event.stopPropagation()}
       >
         <div className="mb-2 flex flex-wrap gap-1.5 border-b pb-2">
           {quickActions.map((action) => (
