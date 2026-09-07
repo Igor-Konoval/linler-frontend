@@ -1,7 +1,7 @@
-import { WorkspaceService } from '@/src/api/services/client/workspace.service';
+import { NotificationService } from '@/src/api/services/client/notification.service';
 import { PaginationQueryParamsValues } from '@/src/constants/routes.constants';
 import type { PaginationParams } from '@/src/types/base.types';
-import type { GetMineInvitationsResponse } from '@/src/types/workspaces.types';
+import type { GetNotificationsResponse } from '@/src/types/notifications.types';
 import { type RequestFailure } from '@/src/utils/request-failure.utils';
 import {
   type InfiniteData,
@@ -9,34 +9,30 @@ import {
   useInfiniteQuery,
 } from '@tanstack/react-query';
 
-export const GET_MINE_INVITATIONS_QUERY_KEY = 'get-mine-invitations';
+export const GET_NOTIFICATIONS_QUERY_KEY = 'get-notifications';
 
-export const useGetMineInvitations = ({
+export const useGetNotifications = ({
   initialData,
   params,
   userId,
 }: {
-  initialData?: GetMineInvitationsResponse;
+  initialData?: GetNotificationsResponse;
   params: PaginationParams;
   userId?: string;
 }): UseInfiniteQueryResult<
-  InfiniteData<GetMineInvitationsResponse>,
+  InfiniteData<GetNotificationsResponse>,
   RequestFailure
 > =>
   useInfiniteQuery<
-    GetMineInvitationsResponse,
+    GetNotificationsResponse,
     RequestFailure,
-    InfiniteData<GetMineInvitationsResponse>,
-    [
-      typeof GET_MINE_INVITATIONS_QUERY_KEY,
-      string | undefined,
-      PaginationParams,
-    ],
+    InfiniteData<GetNotificationsResponse>,
+    [typeof GET_NOTIFICATIONS_QUERY_KEY, string | undefined, PaginationParams],
     number
   >({
-    queryKey: [GET_MINE_INVITATIONS_QUERY_KEY, userId, params],
+    queryKey: [GET_NOTIFICATIONS_QUERY_KEY, userId, params],
     queryFn: async ({ pageParam }) =>
-      await WorkspaceService.getMineInvitations({
+      await NotificationService.getNotifications({
         ...params,
         page: pageParam,
       }),

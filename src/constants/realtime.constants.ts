@@ -1,4 +1,5 @@
 export const REALTIME_NAMESPACE = '/realtime';
+export const REALTIME_SOCKET_PATH = '/api/socket.io';
 
 export const PAGE_ACTIVITY_INTERVAL = 30_000;
 
@@ -18,7 +19,14 @@ export const RealtimeEvent = {
   PAGE_AWARENESS_SYNC: 'page:awareness-sync',
   PAGE_AWARENESS_REQUEST: 'page:awareness-request',
   TASK_BOARD_CHANGED: 'task-board:changed',
+  NOTIFICATION_CREATED: 'notification:created',
 } as const;
+
+export enum NotificationType {
+  WorkspaceMemberJoined = 'workspace_member_joined',
+  TaskAssigned = 'task_assigned',
+  TaskStatusChanged = 'task_status_changed',
+}
 
 export const PAGE_TITLE_BLOCK_ID = '__title__';
 export const PAGE_COVER_BLOCK_ID = '__cover__';

@@ -193,6 +193,16 @@ export function isImageMimeType(mimeType: string | null | undefined): boolean {
   return typeof mimeType === 'string' && mimeType.startsWith('image/');
 }
 
+export function isExternalFileDrop(dataTransfer: DataTransfer): boolean {
+  const types = Array.from(dataTransfer.types);
+
+  if (!types.includes('Files')) {
+    return false;
+  }
+
+  return !types.includes('text/html');
+}
+
 export function getAttachmentUrl(attachment: PageAttachment): string {
   return attachment.fullUrl || attachment.fileUrl;
 }
@@ -274,34 +284,39 @@ export function getFixedMenuPosition(
   clientX: number,
   clientY: number,
 ): { x: number; y: number } {
-  const maxMenuHeight = Math.max(220, window.innerHeight * 0.7);
+  const viewport = window.visualViewport;
+  const viewportWidth = viewport?.width ?? window.innerWidth;
+  const viewportHeight = viewport?.height ?? window.innerHeight;
+  const offsetLeft = viewport?.offsetLeft ?? 0;
+  const offsetTop = viewport?.offsetTop ?? 0;
+  const maxMenuHeight = Math.max(220, viewportHeight * 0.7);
 
   let x = clientX;
   let y = clientY + 8;
 
-  if (x + MENU_MAX_WIDTH + MENU_SIDE_PADDING > window.innerWidth) {
+  if (x + MENU_MAX_WIDTH + MENU_SIDE_PADDING > offsetLeft + viewportWidth) {
     x -= MENU_MAX_WIDTH;
   }
 
-  if (y + maxMenuHeight + MENU_SIDE_PADDING > window.innerHeight) {
+  if (y + maxMenuHeight + MENU_SIDE_PADDING > offsetTop + viewportHeight) {
     y -= maxMenuHeight;
   }
 
   return {
     x: clamp(
       x,
-      MENU_SIDE_PADDING,
+      offsetLeft + MENU_SIDE_PADDING,
       Math.max(
-        MENU_SIDE_PADDING,
-        window.innerWidth - MENU_MAX_WIDTH - MENU_SIDE_PADDING,
+        offsetLeft + MENU_SIDE_PADDING,
+        offsetLeft + viewportWidth - MENU_MAX_WIDTH - MENU_SIDE_PADDING,
       ),
     ),
     y: clamp(
       y,
-      MENU_SIDE_PADDING,
+      offsetTop + MENU_SIDE_PADDING,
       Math.max(
-        MENU_SIDE_PADDING,
-        window.innerHeight - maxMenuHeight - MENU_SIDE_PADDING,
+        offsetTop + MENU_SIDE_PADDING,
+        offsetTop + viewportHeight - maxMenuHeight - MENU_SIDE_PADDING,
       ),
     ),
   };

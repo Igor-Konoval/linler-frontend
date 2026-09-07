@@ -12,6 +12,7 @@ export function LogoutBtn() {
   const handleLogout = async () => {
     await logout();
     router.replace(ROUTES.LOGIN);
+    router.refresh();
   };
 
   return (

@@ -21,9 +21,10 @@ export const useGetWorkspaceMembers = ({
 
       return await WorkspaceService.getWorkspaceMembers(workspaceId);
     },
-    initialData,
+    placeholderData: initialData,
     enabled: Boolean(workspaceId),
-    staleTime: 60_000,
+    staleTime: 0,
+    refetchOnMount: 'always',
     gcTime: 30 * 60_000,
     retry: false,
   });

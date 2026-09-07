@@ -35,6 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../ui/select';
+import { UserAvatar } from '../../user-avatar';
 
 const formSchema = z.object({
   role: z.enum(Object.values(WorkspaceRole) as [string, ...string[]]),
@@ -150,6 +151,20 @@ export function EditWorkspaceMemberModal({
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-4"
         >
+          <div className="flex items-center gap-2">
+            <UserAvatar
+              username={member.username}
+              avatarUrl={member.avatarUrl}
+              size={48}
+              className="h-12 w-12"
+            />
+            <div className="flex flex-col">
+              <span title={member.username} className="text-lg font-medium">
+                {member.username}
+              </span>
+              <span className="text-sm text-gray-500">{member.email}</span>
+            </div>
+          </div>
           <FormField
             control={form.control}
             name="role"

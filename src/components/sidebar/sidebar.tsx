@@ -181,7 +181,7 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="w-(--sidebar-width) bg-sidebar text-sidebar-foreground p-0 [&>button]:hidden"
+          className="w-(--sidebar-width) bg-(--sidebar-background) text-sidebar-foreground p-0 [&>button]:hidden"
           style={
             {
               '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
@@ -549,7 +549,7 @@ function SidebarMenuAction({
       className={cn(
         'text-sidebar-foreground ring-sidebar-ring outline-hidden peer-hover/menu-button:text-sidebar-accent-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground absolute right-1 top-1.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 transition-transform after:absolute after:-inset-2 focus-visible:ring-2 group-data-[collapsible=icon]:hidden peer-data-[size=default]/menu-button:top-1.5 peer-data-[size=lg]/menu-button:top-2.5 peer-data-[size=sm]/menu-button:top-1 md:after:hidden [&>svg]:size-4 [&>svg]:shrink-0',
         showOnHover &&
-          'peer-data-active/menu-button:text-sidebar-accent-foreground transition-opacity group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 aria-expanded:opacity-100 md:opacity-0',
+          'peer-data-active/menu-button:text-sidebar-accent-foreground opacity-100 transition-opacity group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 aria-expanded:opacity-100 md:opacity-0',
         className,
       )}
       {...props}

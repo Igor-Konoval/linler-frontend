@@ -1,6 +1,7 @@
 import { io, type Socket } from 'socket.io-client';
 import {
   REALTIME_NAMESPACE,
+  REALTIME_SOCKET_PATH,
   RealtimeEvent,
 } from '@/src/constants/realtime.constants';
 import { clientEnv } from '@/src/env/client';
@@ -13,6 +14,17 @@ function getRealtimeUrl(): string {
   return `${apiUrl.origin}${REALTIME_NAMESPACE}`;
 }
 
+function getRealtimeSocketPath(): string {
+  const apiUrl = new URL(clientEnv.NEXT_PUBLIC_API_URL);
+  const apiPath = apiUrl.pathname.replace(/\/$/, '');
+
+  if (!apiPath || apiPath === '/') {
+    return REALTIME_SOCKET_PATH;
+  }
+
+  return `${apiPath}/socket.io`;
+}
+
 class RealtimeClient {
   private socket: Socket | null = null;
   private workspaceId: string | undefined;
@@ -23,18 +35,20 @@ class RealtimeClient {
       return;
     }
 
-    if (this.socket) {
-      if (!this.socket.connected) {
-        this.socket.connect();
-      }
+    if (this.socket?.connected) {
+      return;
+    }
 
+    if (this.socket) {
+      this.socket.connect();
       return;
     }
 
     this.socket = io(getRealtimeUrl(), {
+      path: getRealtimeSocketPath(),
       withCredentials: true,
       autoConnect: false,
-      transports: ['websocket', 'polling'],
+      transports: ['polling', 'websocket'],
       reconnection: true,
       reconnectionDelay: 1_000,
       reconnectionDelayMax: 10_000,

@@ -8,6 +8,9 @@ jiti.import('./src/env/client');
 jiti.import('./src/env/server');
 
 const isDevelopment = process.env.NODE_ENV === 'development';
+const appUrl = process.env.NEXT_PUBLIC_APP_URL
+  ? new URL(process.env.NEXT_PUBLIC_APP_URL)
+  : undefined;
 
 const nextConfig: NextConfig = {
   output: 'standalone',
@@ -31,6 +34,16 @@ const nextConfig: NextConfig = {
         port: '3001',
         pathname: '/**',
       },
+      ...(appUrl
+        ? [
+            {
+              protocol: appUrl.protocol.replace(':', '') as 'http' | 'https',
+              hostname: appUrl.hostname,
+              port: appUrl.port || '',
+              pathname: '/uploads/**',
+            },
+          ]
+        : []),
     ],
   },
 };

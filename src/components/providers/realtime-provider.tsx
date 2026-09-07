@@ -19,6 +19,7 @@ import {
   createContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
   type JSX,
@@ -57,6 +58,7 @@ export function RealtimeProvider({ children }: PropsWithChildren): JSX.Element {
 
   const userId = user?.id;
   const isConnected = Boolean(userId) && socketConnected;
+  const joinedWorkspaceIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (!userId) {
@@ -80,16 +82,20 @@ export function RealtimeProvider({ children }: PropsWithChildren): JSX.Element {
       }
     };
 
+    realtimeClient.disconnect();
     realtimeClient.on('connect_error', onConnectError);
     realtimeClient.connect();
 
     return () => {
       realtimeClient.off('connect_error', onConnectError);
+      realtimeClient.disconnect();
     };
   }, [userId]);
 
   useEffect(() => {
     if (!userId || !workspaceId) {
+      joinedWorkspaceIdRef.current = undefined;
+
       if (userId) {
         realtimeClient.leaveWorkspace();
       }
@@ -105,16 +111,20 @@ export function RealtimeProvider({ children }: PropsWithChildren): JSX.Element {
       }
 
       setOnlineUserIds((current) => {
-        const nextIds = data.users.map((presenceUser) => presenceUser.id);
+        const nextIds = [
+          ...data.users.map((presenceUser) => presenceUser.id),
+          userId,
+        ];
+        const next = new Set(nextIds);
 
         if (
-          current.size === nextIds.length &&
+          current.size === next.size &&
           nextIds.every((id) => current.has(id))
         ) {
           return current;
         }
 
-        return new Set(nextIds);
+        return next;
       });
     };
 
@@ -162,12 +172,39 @@ export function RealtimeProvider({ children }: PropsWithChildren): JSX.Element {
     realtimeClient.on(RealtimeEvent.PRESENCE_SYNC, onSync);
     realtimeClient.on(RealtimeEvent.PRESENCE_JOINED, onJoined);
     realtimeClient.on(RealtimeEvent.PRESENCE_LEFT, onLeft);
+
+    if (joinedWorkspaceIdRef.current !== workspaceId) {
+      joinedWorkspaceIdRef.current = workspaceId;
+      setOnlineUserIds(new Set([userId]));
+      setLastSeenAtByUserId({});
+    } else {
+      setOnlineUserIds((current) => {
+        if (current.has(userId)) {
+          return current;
+        }
+
+        const next = new Set(current);
+        next.add(userId);
+        return next;
+      });
+    }
+
     realtimeClient.joinWorkspace(workspaceId);
+    realtimeClient.emit(RealtimeEvent.PAGE_AWARENESS_REQUEST, { workspaceId });
+
+    const retryJoin = window.setTimeout(() => {
+      realtimeClient.joinWorkspace(workspaceId);
+      realtimeClient.emit(RealtimeEvent.PAGE_AWARENESS_REQUEST, {
+        workspaceId,
+      });
+    }, 400);
 
     return () => {
+      window.clearTimeout(retryJoin);
       realtimeClient.off(RealtimeEvent.PRESENCE_SYNC, onSync);
       realtimeClient.off(RealtimeEvent.PRESENCE_JOINED, onJoined);
       realtimeClient.off(RealtimeEvent.PRESENCE_LEFT, onLeft);
+      realtimeClient.leaveWorkspace();
     };
   }, [userId, workspaceId]);
 

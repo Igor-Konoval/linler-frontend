@@ -32,7 +32,6 @@ export function HeaderDropdownBtn() {
             <DropdownMenuItem onSelect={() => setIsAccountSheetOpen(true)}>
               Settings
             </DropdownMenuItem>
-            <DropdownMenuItem>Billing</DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>

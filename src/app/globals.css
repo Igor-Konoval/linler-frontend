@@ -95,6 +95,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-sidebar: var(--sidebar-background);
+  --color-sidebar-foreground: var(--foreground);
 
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -428,8 +430,8 @@ a {
 }
 .linler-editor .tiptap table {
   width: max-content;
-  min-width: 0;
-  max-width: 100%;
+  min-width: 100%;
+  max-width: none;
   table-layout: fixed;
   border-collapse: collapse;
   margin: 0;
@@ -482,10 +484,13 @@ a {
     touch-action: none;
   }
 
-  .linler-editor:not(.linler-editor-readonly) .tiptap .tableWrapper,
+  .linler-editor .tiptap .tableWrapper {
+    touch-action: pan-x pan-y;
+  }
+
   .linler-editor:not(.linler-editor-readonly) .tiptap th,
   .linler-editor:not(.linler-editor-readonly) .tiptap td {
-    touch-action: pan-y;
+    touch-action: pan-x pan-y;
   }
 
   .linler-editor .tiptap .column-resize-handle {
@@ -570,6 +575,14 @@ a {
   overflow-x: hidden;
   overflow-y: visible;
   contain: inline-size;
+}
+
+.linler-editor .tiptap .linler-task-board-scroller {
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  overscroll-behavior-x: contain;
 }
 
 .linler-editor .tiptap .linler-task-board-wrap .collab-chrome {
