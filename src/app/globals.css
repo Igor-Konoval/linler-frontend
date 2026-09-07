@@ -191,6 +191,9 @@ a {
   font-size: 1rem;
   padding: 0.4rem 0.35rem;
   overflow: visible;
+  touch-action: auto;
+  -webkit-user-select: text !important;
+  user-select: text !important;
 }
 
 .linler-editor .tiptap > :first-child:not(img) {
@@ -484,7 +487,8 @@ a {
     touch-action: none;
   }
 
-  .linler-editor .tiptap .tableWrapper {
+  .linler-editor .tiptap .tableWrapper,
+  .linler-editor-nested .tiptap .tableWrapper {
     touch-action: pan-x pan-y;
   }
 
