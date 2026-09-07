@@ -103,6 +103,11 @@ export function useEditorContextMenu({
       }
 
       const targetEl = event.target as HTMLElement;
+      const isAtomTarget = Boolean(targetEl.closest?.(ATOM_CONTEXT_SELECTOR));
+
+      if (isCoarsePointer() && editor.state.selection.empty && !isAtomTarget) {
+        return;
+      }
 
       event.preventDefault();
       event.stopPropagation();
