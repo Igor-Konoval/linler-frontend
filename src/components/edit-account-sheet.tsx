@@ -191,7 +191,7 @@ export function EditAccountSheet({
             Make changes to your account here. Click save when you&apos;re done.
           </SheetDescription>
         </SheetHeader>
-        <div className="grid flex-1 auto-rows-min gap-6 px-4">
+        <div className="grid min-h-0 flex-1 auto-rows-min gap-6 overflow-y-auto px-4">
           <div className="grid gap-3">
             <Label htmlFor="avatar-upload">Avatar</Label>
             <div className="relative">
@@ -222,7 +222,7 @@ export function EditAccountSheet({
                 />
               ) : (
                 <div
-                  className="flex aspect-square h-full w-full cursor-pointer items-center justify-center rounded-lg bg-[#dedede] text-4xl font-medium text-neutral-600 dark:bg-muted dark:text-muted-foreground"
+                  className="dark:bg-muted dark:text-muted-foreground flex aspect-square h-full w-full cursor-pointer items-center justify-center rounded-lg bg-[#dedede] text-4xl font-medium text-neutral-600"
                   onClick={() =>
                     document.getElementById('avatar-upload')?.click()
                   }

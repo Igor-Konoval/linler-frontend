@@ -91,7 +91,7 @@ export function TaskCardSheet({
       <SheetContent
         side="right"
         className={cn(
-          'flex h-full w-full flex-col gap-0 overflow-hidden data-[side=right]:sm:max-w-2xl',
+          'flex w-full flex-col gap-0 overflow-hidden data-[side=right]:sm:max-w-2xl',
           isMobile && 'max-w-screen! w-screen!',
         )}
         onOpenAutoFocus={(event) => event.preventDefault()}
