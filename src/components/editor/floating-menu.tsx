@@ -132,9 +132,9 @@ export function FloatingMenu({
         className={cn(
           'bg-popover max-w-75 pointer-events-auto w-full overflow-y-scroll overscroll-contain rounded-xl border p-2 shadow-xl [-webkit-overflow-scrolling:touch]',
           placement === 'fixed' && !portalTarget
-            ? 'fixed z-80'
+            ? 'z-80 fixed'
             : placement === 'fixed'
-              ? 'absolute z-80'
+              ? 'z-80 absolute'
               : 'absolute z-30',
         )}
         style={{

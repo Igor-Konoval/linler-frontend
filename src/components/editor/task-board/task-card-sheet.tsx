@@ -140,7 +140,7 @@ export function TaskCardSheet({
           </RemoteUserFrame>
         </SheetHeader>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-x-hidden overflow-y-auto overscroll-contain p-4">
+        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden overscroll-contain p-4">
           <PropertyRow label="Status">
             {editable ? (
               <DropdownMenu>
