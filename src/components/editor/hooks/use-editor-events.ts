@@ -21,6 +21,7 @@ interface EditorEventsInterface {
   scheduleSave: (request: UpdatePageRequest) => void;
   coverResizeStateRef?: RefObject<CoverResizeState | null>;
   updateCoverMeta?: (partial: Partial<PageCoverMeta>) => void;
+  persistCoverMeta?: () => void;
   editorResizeStateRef?: RefObject<EditorResizeState | null>;
   setEditorContentOffsetX?: (value: SetStateAction<number | null>) => void;
   setEditorContentWidth?: (value: SetStateAction<number | null>) => void;
@@ -40,6 +41,7 @@ export function useEditorEvents({
   scheduleSave,
   coverResizeStateRef,
   updateCoverMeta,
+  persistCoverMeta,
   editorResizeStateRef,
   setEditorContentOffsetX,
   setEditorContentWidth,
@@ -199,8 +201,14 @@ export function useEditorEvents({
     };
 
     const handlePointerUp = () => {
+      const wasCoverResize = Boolean(coverResizeStateRef?.current);
+
       if (coverResizeStateRef) {
         coverResizeStateRef.current = null;
+      }
+
+      if (wasCoverResize) {
+        persistCoverMeta?.();
       }
 
       const editorWidthState = editorResizeStateRef?.current;
@@ -340,6 +348,7 @@ export function useEditorEvents({
     editor,
     scheduleSave,
     updateCoverMeta,
+    persistCoverMeta,
     articleRef,
     editorLayoutRef,
     setEditorContentOffsetX,
