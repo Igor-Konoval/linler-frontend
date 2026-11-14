@@ -1,0 +1,22 @@
+---
+description: Branch, production, and verification rules for Linler frontend
+alwaysApply: true
+---
+
+# Workflow
+
+- The integration branch for this AI-first line is `igor/feat/cursor-workflow`. Cut each feature from it, then merge that feature back into it when the user asks. Do not merge this line into `dev` or `main` until the user names that branch.
+- Stay on `igor/feat/<name>`, `igor/fix/<name>`, or `igor/bug/<name>`. Create that branch before the first code edit of a task.
+- `main` builds and deploys on every push (`.github/workflows/cd-build-deploy.yml`). Never push, force-push, or commit directly to `main`.
+- A merge into `dev`, `main`, or the integration branch happens only when the user asks in the chat. Do not commit, push, or open a pull request otherwise.
+- Use Plan mode before a change that touches several files, routing, billing, or auth. Keep the slice small enough to review in one PR.
+- Code changes: the same agent runs `pnpm check` before handing the work back. It formats, then lints and typechecks. Do not delegate that command to a subagent. If it fails, fix the errors in this session.
+- CI uses `pnpm check:ci` (`fmt:verify`, lint, types) and fails if formatting is dirty. Do not rely on CI to format.
+- A visible UI, layout, routing, or data change is done only after the affected flow is exercised in the browser.
+- Secrets stay out of git. Use `.env.example` as the list of variable names. Never put Stripe secret keys, webhook secrets, or `JWT_ACCESS_SECRET` in client code or `NEXT_PUBLIC_*`.
+
+```text
+igor/feat/stripe-billing    feature
+igor/fix/page-save          correction
+igor/bug/invite-toast       defect
+```
