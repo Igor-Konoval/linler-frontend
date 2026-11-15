@@ -35,6 +35,7 @@ import {
 } from '../../ui/dropdown-menu';
 import { TaskDescriptionEditor } from './task-description-editor';
 import { TaskMemberAvatar } from './task-member-avatar';
+import { UserName } from '@/src/components/user-name';
 import { parseTaskCardAwareness } from '@/src/utils/realtime.utils';
 
 export function TaskCardSheet({
@@ -269,7 +270,14 @@ export function TaskCardSheet({
                     className="inline-flex items-center gap-2 text-sm"
                   >
                     <TaskMemberAvatar member={assignee} size={22} />
-                    {assignee?.username ?? 'Empty'}
+                    {assignee ? (
+                      <UserName
+                        name={assignee.username}
+                        subscribed={assignee.subscriptionActive}
+                      />
+                    ) : (
+                      'Empty'
+                    )}
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="min-w-48">
@@ -282,7 +290,10 @@ export function TaskCardSheet({
                       }
                     >
                       <TaskMemberAvatar member={member} size={20} />
-                      {member.username}
+                      <UserName
+                        name={member.username}
+                        subscribed={member.subscriptionActive}
+                      />
                     </DropdownMenuItem>
                   ))}
                   <DropdownMenuSeparator />
@@ -296,7 +307,14 @@ export function TaskCardSheet({
             ) : (
               <span className="inline-flex items-center gap-2 text-sm">
                 <TaskMemberAvatar member={assignee} size={22} />
-                {assignee?.username ?? 'Empty'}
+                {assignee ? (
+                  <UserName
+                    name={assignee.username}
+                    subscribed={assignee.subscriptionActive}
+                  />
+                ) : (
+                  'Empty'
+                )}
               </span>
             )}
           </PropertyRow>

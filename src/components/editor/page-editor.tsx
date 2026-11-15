@@ -307,6 +307,7 @@ function PageEditorContent({ page }: { page: PageResponse }) {
                 id: page.updatedBy.id,
                 username: page.updatedBy.username,
                 avatarUrl: page.updatedBy.avatarUrl,
+                subscriptionActive: page.updatedBy.subscriptionActive,
                 updatedAt: page.updatedAt,
               },
             ]

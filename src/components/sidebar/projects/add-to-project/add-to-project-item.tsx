@@ -15,6 +15,7 @@ import { ProjectMemberRole } from '@/src/constants/workspaces.constants';
 import { useAddProjectMember } from '@/src/hooks/projects/use-add-project-member';
 import { WorkspaceMemberResponse } from '@/src/types/workspaces.types';
 import { UserAvatar } from '@/src/components/user-avatar';
+import { UserName } from '@/src/components/user-name';
 import { isRequestFailure } from '@/src/utils/request-failure.utils';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -70,12 +71,11 @@ export function AddToProjectItem({
           className="size-8 shrink-0"
         />
         <div className="flex min-w-0 flex-1 flex-col">
-          <span
-            className="truncate text-sm font-medium"
-            title={member.username}
-          >
-            {member.username}
-          </span>
+          <UserName
+            name={member.username}
+            subscribed={member.subscriptionActive}
+            className="text-sm font-medium"
+          />
           <span className="truncate text-xs text-gray-500" title={member.email}>
             {member.email}
           </span>

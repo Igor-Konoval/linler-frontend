@@ -12,6 +12,7 @@ import { getUserColor } from '@/src/utils/user-color.utils';
 import { useEffect, useSyncExternalStore } from 'react';
 import { SidebarTrigger } from '../sidebar/sidebar';
 import { UserAvatar } from '../user-avatar';
+import { UserName } from '../user-name';
 import { Button } from '../ui/button';
 import {
   HoverCard,
@@ -93,6 +94,7 @@ export function Header() {
                 username: page.updatedBy.username,
                 avatarUrl: page.updatedBy.avatarUrl,
                 updatedAt: page.updatedAt,
+                subscriptionActive: page.updatedBy.subscriptionActive,
               },
             ]
           : [],
@@ -108,6 +110,7 @@ export function Header() {
             username: page.updatedBy.username,
             avatarUrl: page.updatedBy.avatarUrl,
             updatedAt: page.updatedAt,
+            subscriptionActive: page.updatedBy.subscriptionActive,
           },
         ]
       : [];
@@ -156,8 +159,13 @@ export function Header() {
                               style={{ boxShadow: `0 0 0 2px ${color}` }}
                             />
                           </span>
-                          <p className="truncate">
-                            Edited by <b>{name}</b>
+                          <p className="flex min-w-0 items-center gap-1 truncate">
+                            Edited by{' '}
+                            <UserName
+                              name={name}
+                              subscribed={editor.subscriptionActive}
+                              className="font-semibold"
+                            />
                           </p>
                         </div>
                         <p className="text-muted-foreground shrink-0 text-xs">

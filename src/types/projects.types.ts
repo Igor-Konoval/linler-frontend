@@ -40,6 +40,7 @@ export interface GetProjectMemberResponse {
   email: string;
   username: string;
   avatarUrl: string | null;
+  subscriptionActive?: boolean;
   role: ProjectMemberRole;
   createdAt: string;
 }

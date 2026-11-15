@@ -45,6 +45,7 @@ export const useUpdatePage = (
                   id: data.updatedBy.id,
                   username: data.updatedBy.username,
                   avatarUrl: data.updatedBy.avatarUrl,
+                  subscriptionActive: data.updatedBy.subscriptionActive,
                   updatedAt: data.updatedAt,
                 },
               ]

@@ -18,7 +18,7 @@ Do one slice per branch. Examples: checkout button and return page, not the whol
 
 1. Cut the branch from `igor/feat/cursor-workflow`. The branch name is `igor/feat/<name>`, `igor/fix/<name>`, or `igor/bug/<name>`. Do not start from `dev` or `main`.
 2. For work that spans multiple files or changes product behavior, write the plan first (Plan mode): user outcome, files, what stays on the backend, how to verify.
-3. Implement only that slice. Follow `.cursor/rules/stack.mdc` for placement.
+3. Implement only that slice. Follow `.cursor/rules/stack.mdc` for placement. Put each new request and response interface in `src/types/<feature>.types.ts`.
 4. Run `pnpm check` in this session. It is a local command. On failure, fix it here. Do not start a subagent to run the check. For a UI change, exercise the flow in the browser, including empty and error states the slice touches.
 5. Ask the `reviewer` subagent to review the diff against `igor/feat/cursor-workflow` before calling the slice done.
 6. Stop. Commit, push, or merge back into `igor/feat/cursor-workflow` only when the user asks. Leave `dev` and `main` untouched unless the user names one of them.
