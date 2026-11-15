@@ -1,5 +1,6 @@
 import { type CSSProperties, type ReactNode } from 'react';
 import type { RemoteBlockAwareness } from './collaboration-highlight';
+import { UserName } from '@/src/components/user-name';
 import { cn } from '@/src/utils/utils';
 
 export function RemoteUserFrame({
@@ -26,7 +27,10 @@ export function RemoteUserFrame({
               className="collab-block-label"
               style={{ backgroundColor: user.color }}
             >
-              {user.username}
+              <UserName
+                name={user.username}
+                subscribed={user.subscriptionActive}
+              />
             </span>
           ))}
         </div>

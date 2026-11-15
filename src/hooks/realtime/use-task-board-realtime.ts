@@ -48,6 +48,7 @@ function toRemoteAwareness(
     userId: payload.user.id,
     username: payload.user.username,
     color: getUserColor(payload.user.id),
+    subscriptionActive: payload.user.subscriptionActive,
     blockId: payload.blockId,
   };
 }

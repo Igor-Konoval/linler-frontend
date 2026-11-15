@@ -5,6 +5,7 @@ export type NotificationPayload = {
   actorUserId: string;
   actorUsername: string;
   actorAvatarUrl: string | null;
+  actorSubscriptionActive?: boolean;
   workspaceId: string;
   workspaceName: string;
   targetUserId?: string;

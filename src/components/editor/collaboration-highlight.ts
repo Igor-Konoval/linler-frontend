@@ -8,6 +8,7 @@ export type RemoteBlockAwareness = {
   username: string;
   color: string;
   blockId: string;
+  subscriptionActive?: boolean;
 };
 
 const awarenessPluginKey = new PluginKey<DecorationSet>('pageAwareness');

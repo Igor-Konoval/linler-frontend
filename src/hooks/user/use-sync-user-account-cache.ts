@@ -23,6 +23,9 @@ export function useSyncUserAccountCache() {
         email: user.email,
         username: user.username,
         avatarUrl: user.avatarUrl,
+        subscriptionActive: user.subscriptionActive,
+        subscriptionCancelAtPeriodEnd: user.subscriptionCancelAtPeriodEnd,
+        subscriptionCurrentPeriodEnd: user.subscriptionCurrentPeriodEnd,
       });
 
       queryClient.setQueriesData<GetWorkspaceMembersResponse>(
@@ -40,6 +43,7 @@ export function useSyncUserAccountCache() {
                     ...member,
                     username: user.username,
                     avatarUrl: user.avatarUrl ?? '',
+                    subscriptionActive: user.subscriptionActive,
                   }
                 : member,
             ),
@@ -62,6 +66,7 @@ export function useSyncUserAccountCache() {
                     ...member,
                     username: user.username,
                     avatarUrl: user.avatarUrl,
+                    subscriptionActive: user.subscriptionActive,
                   }
                 : member,
             ),

@@ -16,6 +16,7 @@ When invoked:
 3. Check the diff against the project rules:
    - branch is not `main`, and the change does not require a push to `main`
    - new UI follows the existing path: component, hook, server action, server service
+   - request and response interfaces live in `src/types/<feature>.types.ts`, not in a service file or as an anonymous generic
    - no secrets, webhook signing secrets, or private API keys in client code or `NEXT_PUBLIC_*`
    - env additions are reflected in `.env.example` and `src/env`
    - the slice is one feature, small enough for one PR

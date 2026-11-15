@@ -13,6 +13,7 @@ import { Calendar, GripVertical } from 'lucide-react';
 import type { RemoteBlockAwareness } from '../collaboration-highlight';
 import { RemoteUserFrame } from '../remote-user-frame';
 import { TaskMemberAvatar } from './task-member-avatar';
+import { UserName } from '@/src/components/user-name';
 
 export function TaskBoardCard({
   card,
@@ -105,9 +106,17 @@ export function TaskBoardCard({
 
           <div className="mt-2 flex items-center gap-1.5 pl-5">
             <TaskMemberAvatar member={assignee} size={20} />
-            <span className="text-muted-foreground truncate text-[11px]">
-              {assignee?.username ?? 'Unassigned'}
-            </span>
+            {assignee ? (
+              <UserName
+                name={assignee.username}
+                subscribed={assignee.subscriptionActive}
+                className="text-muted-foreground text-[11px]"
+              />
+            ) : (
+              <span className="text-muted-foreground truncate text-[11px]">
+                Unassigned
+              </span>
+            )}
           </div>
         </article>
       </RemoteUserFrame>

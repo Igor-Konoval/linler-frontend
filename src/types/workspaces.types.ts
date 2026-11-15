@@ -82,6 +82,7 @@ export interface WorkspaceMemberResponse {
   email: string;
   username: string;
   avatarUrl: string;
+  subscriptionActive?: boolean;
   role: WorkspaceRole;
   status: WorkspaceMemberStatus;
   joinedAt: string;

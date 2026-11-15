@@ -29,12 +29,14 @@ export interface PageResponse {
     id: string;
     username: string;
     avatarUrl: string | null;
+    subscriptionActive?: boolean;
   };
   recentEditors?: Array<{
     id: string;
     username: string;
     avatarUrl: string | null;
     updatedAt: string;
+    subscriptionActive?: boolean;
   }>;
   attachments: PageAttachment[];
   projectRole: ProjectMemberRole;

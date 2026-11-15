@@ -7,6 +7,7 @@ export type PageActivityEntry = {
   username: string;
   avatarUrl: string | null;
   updatedAt: string;
+  subscriptionActive?: boolean;
 };
 
 const EMPTY_ACTIVITY: PageActivityEntry[] = [];
@@ -36,7 +37,8 @@ function areSameEntries(
       entry.id === right[index]?.id &&
       entry.updatedAt === right[index]?.updatedAt &&
       entry.username === right[index]?.username &&
-      entry.avatarUrl === right[index]?.avatarUrl,
+      entry.avatarUrl === right[index]?.avatarUrl &&
+      entry.subscriptionActive === right[index]?.subscriptionActive,
   );
 }
 
