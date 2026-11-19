@@ -1,6 +1,7 @@
 'use client';
 
 import { UserAvatar } from '@/src/components/user-avatar';
+import { UserName } from '@/src/components/user-name';
 import { formatDateTime } from '@/src/utils/date.utils';
 import { GetProjectMemberResponse } from '@/src/types/projects.types';
 import { useGetWorkspaceRole } from '@/src/hooks/use-get-workspace-role';
@@ -98,7 +99,11 @@ export function SettingsProjectMembersItem({
           className="max-[456px]:min-h-8! max-[456px]:min-w-8! min-[456px]:min-h-14! min-[456px]:min-w-14!"
         />
         <div className="overflow-auto truncate">
-          <p className="text-sm font-medium">{member.username}</p>
+          <UserName
+            name={member.username}
+            subscribed={member.subscriptionActive}
+            className="text-sm font-medium"
+          />
           <p className="text-sm text-gray-500">{member.email}</p>
           <p className="text-sm text-gray-500">
             {getProjectMemberRole(member.role)}

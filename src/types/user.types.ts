@@ -3,6 +3,9 @@ export interface GetUserAccountResponse {
   email: string;
   username: string;
   avatarUrl: null | string;
+  subscriptionActive?: boolean;
+  subscriptionCancelAtPeriodEnd?: boolean;
+  subscriptionCurrentPeriodEnd?: string | null;
 }
 
 export interface EditUserAccountRequest {

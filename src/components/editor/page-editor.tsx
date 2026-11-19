@@ -189,6 +189,11 @@ function PageEditorContent({ page }: { page: PageResponse }) {
     sanitizeContentForSave,
     projectId: page.projectId,
   });
+  const saveRef = useRef(save);
+
+  useEffect(() => {
+    saveRef.current = save;
+  }, [save]);
 
   const { editor, uploadAndInsertAttachments, isUploadingAttachment } =
     useEditorConfig({
@@ -302,6 +307,7 @@ function PageEditorContent({ page }: { page: PageResponse }) {
                 id: page.updatedBy.id,
                 username: page.updatedBy.username,
                 avatarUrl: page.updatedBy.avatarUrl,
+                subscriptionActive: page.updatedBy.subscriptionActive,
                 updatedAt: page.updatedAt,
               },
             ]
@@ -311,10 +317,13 @@ function PageEditorContent({ page }: { page: PageResponse }) {
 
   useEffect(
     () => () => {
-      if (saveTimer.current) clearTimeout(saveTimer.current);
-      void save();
+      if (saveTimer.current) {
+        clearTimeout(saveTimer.current);
+      }
+
+      void saveRef.current();
     },
-    [save, saveTimer],
+    [saveTimer],
   );
 
   const removeSlashQuery = useCallback(() => {
@@ -380,18 +389,20 @@ function PageEditorContent({ page }: { page: PageResponse }) {
     scheduleSave({ cover: null, coverMeta: null });
   }, [scheduleSave]);
 
-  const updateCoverMeta = useCallback(
-    (partial: Partial<PageCoverMeta>) => {
+  const updateCoverMeta = useCallback((partial: Partial<PageCoverMeta>) => {
+    setCoverMeta((current) => {
       const nextMeta: PageCoverMeta = {
-        ...coverMeta,
+        ...current,
         ...partial,
       };
+      coverMetaRef.current = nextMeta;
+      return nextMeta;
+    });
+  }, []);
 
-      setCoverMeta(nextMeta);
-      scheduleSave({ coverMeta: nextMeta });
-    },
-    [coverMeta, scheduleSave],
-  );
+  const persistCoverMeta = useCallback(() => {
+    scheduleSave({ coverMeta: coverMetaRef.current });
+  }, [scheduleSave]);
 
   const resizeActiveImage = useCallback(
     (direction: ImageResizeDirectionEnum) => {
@@ -924,6 +935,7 @@ function PageEditorContent({ page }: { page: PageResponse }) {
     setIsEditorRightHandleVisible,
     scheduleSave,
     updateCoverMeta,
+    persistCoverMeta,
     closeFloatingMenu,
     floatingMenu,
     floatingMenuRef,

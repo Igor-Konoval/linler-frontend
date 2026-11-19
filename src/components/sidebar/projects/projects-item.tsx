@@ -26,8 +26,10 @@ import { Button } from '../../ui/button';
 import { SettingsProjectModal } from './edit-project-modal';
 import { ProjectVisibility } from '@/src/constants/projects.constants';
 import { CreateProjectModal } from './create-project/create-project-modal';
+import { CreateProjectPageModal } from '../project-pages/create-project-page-modal';
 import { PagesSection } from '../project-pages/pages-section';
 import { getProjectPath } from '@/src/utils/project.utils';
+import { canUserInteractPage } from '@/src/utils/workspaces.utils';
 
 export type NavAccordionItem = {
   key: string;
@@ -119,6 +121,24 @@ export function ProjectsItem({
                               >{`${item.icon ? item.icon : ''} ${item.name}`}</div>
                             </Link>
                           </SidebarMenuButton>
+                          {canUserInteractPage(item.role) ? (
+                            <CreateProjectPageModal
+                              trigger={
+                                <Button
+                                  variant="ghostSecondary"
+                                  size="icon"
+                                  type="button"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="h-auto w-auto shrink-0 px-1.5 py-1.5"
+                                >
+                                  <Plus strokeWidth={1} className="h-4 w-4" />
+                                </Button>
+                              }
+                              projectId={item.id}
+                              projectRole={item.role}
+                              parentPageId={null}
+                            />
+                          ) : null}
                           <SettingsProjectModal
                             trigger={
                               <Button

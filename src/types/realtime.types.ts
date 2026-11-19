@@ -12,6 +12,7 @@ export type PresenceUser = {
   id: string;
   username: string;
   avatarUrl: string | null;
+  subscriptionActive?: boolean;
 };
 
 export type PresenceSyncPayload = {

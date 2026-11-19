@@ -1,6 +1,7 @@
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupLabel,
   SidebarHeader,
@@ -23,6 +24,7 @@ import { ProjectsSkeleton } from './projects/projects-skeleton';
 import { SpaceSwitcherSection } from './space-switcher/space-switcher-section';
 import { AppSidebarSkeleton } from './space-switcher/space-switcher-skeleton';
 import { ThemedImage } from '../ui/themed-image';
+import { SidebarAccount } from './sidebar-account';
 
 async function getCurrentWorkspaceId(): Promise<string | undefined> {
   const headersList = await headers();
@@ -79,6 +81,9 @@ export async function AppSidebar({
           </Suspense>
         </Accordion>
       </SidebarContent>
+      <SidebarFooter className="border-t">
+        <SidebarAccount />
+      </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );

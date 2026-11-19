@@ -1,3 +1,4 @@
+import { AssistantWidget } from '@/src/components/assistant/assistant-widget';
 import { Header } from '@/src/components/header/header';
 import { AppSidebar } from '@/src/components/sidebar/app-sidebar';
 import { SidebarProvider } from '@/src/components/sidebar/sidebar';
@@ -22,6 +23,7 @@ export default function RootLayout({
         <Header />
         {children}
       </main>
+      <AssistantWidget />
     </SidebarProvider>
   );
 }

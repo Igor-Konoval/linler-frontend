@@ -22,6 +22,7 @@ import { Button } from '../../ui/button';
 import { AddMemberToWorkspaceModal } from './add-member-to-workspace';
 import { EditWorkspaceMemberModal } from './edit-workspace-member-modal';
 import { UserAvatar } from '@/src/components/user-avatar';
+import { UserName } from '@/src/components/user-name';
 import { useIsUserOnline } from '@/src/hooks/realtime/use-workspace-presence';
 import type {
   GetWorkspaceMembersResponse,
@@ -139,7 +140,11 @@ function WorkspaceMemberRow({
               />
             ) : null}
           </span>
-          <span title={item.username}>{item.username}</span>
+          <UserName
+            name={item.username}
+            subscribed={item.subscriptionActive}
+            className="min-w-0"
+          />
         </div>
       </SidebarMenuButton>
       {workspaceId ? (

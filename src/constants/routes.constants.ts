@@ -9,6 +9,7 @@ export const ROUTES = {
 
   PROFILE: '/profile',
   SETTINGS: '/settings',
+  BILLING: '/billing',
 } as const;
 
 export const PATHNAME_HEADER = 'x-current-pathname';
@@ -35,4 +36,5 @@ export const PROTECTED_PAGES_URLS_ARRAY = [
   ROUTES.SETTINGS,
   ROUTES.HOME,
   ROUTES.WORKSPACE,
+  ROUTES.BILLING,
 ];

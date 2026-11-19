@@ -36,6 +36,7 @@ import {
   SelectValue,
 } from '../../ui/select';
 import { UserAvatar } from '../../user-avatar';
+import { UserName } from '../../user-name';
 
 const formSchema = z.object({
   role: z.enum(Object.values(WorkspaceRole) as [string, ...string[]]),
@@ -159,9 +160,11 @@ export function EditWorkspaceMemberModal({
               className="h-12 w-12"
             />
             <div className="flex flex-col">
-              <span title={member.username} className="text-lg font-medium">
-                {member.username}
-              </span>
+              <UserName
+                name={member.username}
+                subscribed={member.subscriptionActive}
+                className="text-lg font-medium"
+              />
               <span className="text-sm text-gray-500">{member.email}</span>
             </div>
           </div>
