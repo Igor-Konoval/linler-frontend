@@ -1,3 +1,4 @@
+
 name: Frontend CD
 
 on:
@@ -8,10 +9,14 @@ on:
 
 env:
   IMAGE: ghcr.io/igor-konoval/linler-frontend
+  AWS_REGION: eu-north-1
+  EC2_INSTANCE_ID: i-03054c1cab6f30914
 
 jobs:
   build:
-    timeout-minutes: 20
+    name: Build (${{ matrix.platform }})
+    timeout-minutes: 30
+
     strategy:
       fail-fast: false
       matrix:
@@ -75,6 +80,7 @@ jobs:
           retention-days: 1
 
   merge:
+    name: Create multi-arch image
     needs: build
     runs-on: ubuntu-24.04
 
@@ -108,21 +114,118 @@ jobs:
             $(printf '${{ env.IMAGE }}@sha256:%s ' *)
 
   deploy:
+    name: Deploy frontend to production
     needs: merge
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    if: github.ref == 'refs/heads/main'
+
+    concurrency:
+      group: linler-frontend-production
+      cancel-in-progress: false
+
+    permissions:
+      contents: read
 
     steps:
-      - name: Pull image and recreate frontend on VPS
-        uses: appleboy/ssh-action@v1.2.2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          command_timeout: 10m
-          script: |
-            set -e
-            cd /opt/linler-frontend
-            docker compose -f docker-compose.prod.yml pull
-            docker compose -f docker-compose.prod.yml up -d --no-deps --force-recreate
-            docker compose -f docker-compose.prod.yml ps
-            docker logs linler-frontend --tail 50
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Verify AWS access
+        run: |
+          aws sts get-caller-identity
+
+      - name: Send deployment command through SSM
+        id: deploy
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          PARAMETERS="$(cat <<'JSON'
+          {
+            "commands": [
+              "set -Eeuo pipefail",
+              "cd /opt/linler",
+              "echo 'Pulling frontend image...'",
+              "docker compose -f docker-compose.prod.yml pull frontend",
+              "echo 'Recreating frontend container...'",
+              "docker compose -f docker-compose.prod.yml up -d --no-deps --force-recreate frontend",
+              "echo 'Checking frontend HTTP response...'",
+              "for attempt in $(seq 1 30); do if curl -fsS http://127.0.0.1:3000 >/dev/null; then echo 'Frontend HTTP check passed'; break; fi; if [ \"$attempt\" -eq 30 ]; then echo 'Frontend HTTP check failed'; docker logs --tail 100 linler-frontend || true; exit 1; fi; sleep 2; done",
+              "docker compose -f docker-compose.prod.yml ps frontend",
+              "docker logs --tail 50 linler-frontend"
+            ]
+          }
+          JSON
+          )"
+
+          COMMAND_ID="$(aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --instance-ids "$EC2_INSTANCE_ID" \
+            --comment "Linler frontend deployment ${GITHUB_SHA}" \
+            --timeout-seconds 600 \
+            --parameters "$PARAMETERS" \
+            --query "Command.CommandId" \
+            --output text)"
+
+          echo "SSM command ID: $COMMAND_ID"
+
+          echo "command_id=$COMMAND_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for deployment and check result
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          COMMAND_ID="${{ steps.deploy.outputs.command_id }}"
+          STATUS="Unknown"
+
+          for attempt in $(seq 1 120); do
+            STATUS="$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$EC2_INSTANCE_ID" \
+              --query "Status" \
+              --output text 2>/dev/null || true)"
+
+            echo "SSM status: $STATUS"
+
+            case "$STATUS" in
+              Success)
+                break
+                ;;
+              Failed|Cancelled|TimedOut|DeliveryTimedOut|ExecutionTimedOut)
+                echo "Deployment failed."
+                aws ssm get-command-invocation \
+                  --command-id "$COMMAND_ID" \
+                  --instance-id "$EC2_INSTANCE_ID" \
+                  --output json || true
+                exit 1
+                ;;
+            esac
+
+            sleep 5
+          done
+
+          if [ "$STATUS" != "Success" ]; then
+            echo "Deployment timed out. Last status: $STATUS"
+            aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$EC2_INSTANCE_ID" \
+              --output json || true
+            exit 1
+          fi
+
+          echo "=== Deployment output ==="
+
+          aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$EC2_INSTANCE_ID" \
+            --query "StandardOutputContent" \
+            --output text
+
+          echo "=== Deployment completed successfully ==="
