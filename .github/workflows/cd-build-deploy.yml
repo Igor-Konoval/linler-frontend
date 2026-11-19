@@ -149,7 +149,7 @@ jobs:
           PARAMETERS="$(cat <<'JSON'
           {
             "commands": [
-              "set -Eeuo pipefail",
+              "set -eu",
               "cd /opt/linler",
               "echo 'Pulling frontend image...'",
               "docker compose -f docker-compose.prod.yml pull frontend",
