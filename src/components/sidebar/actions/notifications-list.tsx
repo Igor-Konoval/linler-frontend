@@ -16,7 +16,7 @@ import {
 import { isRequestFailure } from '@/src/utils/request-failure.utils';
 import { cn } from '@/src/utils/utils';
 import { useQueryClient, type InfiniteData } from '@tanstack/react-query';
-import { Eye, Loader2 } from 'lucide-react';
+import { Eye, Loader2, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, type RefCallback, type RefObject } from 'react';
 import { toast } from 'sonner';
@@ -150,13 +150,21 @@ export function NotificationsList({
           >
             <div className="flex items-start justify-between gap-2">
               <div className="flex min-w-0 items-start gap-2">
-                <UserAvatar
-                  username={notification.payload.actorUsername}
-                  avatarUrl={notification.payload.actorAvatarUrl}
-                  size={24}
-                  className="h-6 min-h-6 w-6 min-w-6"
-                  fallback="initials"
-                />
+                <span className="relative inline-flex shrink-0">
+                  <UserAvatar
+                    username={notification.payload.actorUsername}
+                    avatarUrl={notification.payload.actorAvatarUrl}
+                    size={24}
+                    className="h-6 min-h-6 w-6 min-w-6"
+                    fallback="initials"
+                  />
+                  {notification.payload.actorSubscriptionActive ? (
+                    <Sparkles
+                      className="absolute -right-1 -top-1 size-3 text-amber-500"
+                      aria-label="Subscribed"
+                    />
+                  ) : null}
+                </span>
                 <span
                   className={cn(
                     'text-[13px] leading-snug',

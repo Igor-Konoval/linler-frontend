@@ -3,6 +3,9 @@ export interface GetUserResponse {
   email: string;
   username: string;
   avatarUrl: null | string;
+  subscriptionActive?: boolean;
+  subscriptionCancelAtPeriodEnd?: boolean;
+  subscriptionCurrentPeriodEnd?: string | null;
 }
 
 export interface RegisterRequest {
